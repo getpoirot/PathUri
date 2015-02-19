@@ -1,0 +1,20 @@
+{
+    "name": "poirot/pathuri",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Payam Naderi",
+            "email": "naderi.payam@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "poirot/core": "dev-master"
+    },
+    "target-dir": "Poirot/PathUri",
+    "autoload"  : {
+        "psr-0": {
+            "Poirot\\PathUri": "."
+        }
+    }
+}
