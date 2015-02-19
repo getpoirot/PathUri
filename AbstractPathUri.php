@@ -32,6 +32,31 @@ abstract class AbstractPathUri
                     , is_object($pathUri) ? get_class($pathUri) : gettype($pathUri)
                 ));
         }
+
+    }
+
+    /**
+     * Build Object From PathUri
+     *
+     * - it take a instance of pathUri object
+     *   same as base object
+     *
+     * @param iPathUri $path
+     *
+     * @return $this
+     */
+    function fromPathUri(/*iUriPath*/ $path)
+    {
+        if (!is_object($path) || ! $path instanceof $this)
+            throw new \InvalidArgumentException(sprintf(
+                'PathUri must be instanceof %s, given: %s'
+                , get_class($this)
+                , is_object($path) ? get_class($path) : gettype($path)
+            ));
+
+        $this->fromArray($path->toArray());
+
+        return $this;
     }
 }
  

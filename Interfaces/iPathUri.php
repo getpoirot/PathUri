@@ -15,6 +15,8 @@ interface iPathUri
     /**
      * Build Object From String
      *
+     * - parse string and build object
+     *
      * @param string $pathUri
      *
      * @throws \InvalidArgumentException
@@ -40,6 +42,7 @@ interface iPathUri
      *
      * @param iPathUri $path
      *
+     * @throws \InvalidArgumentException
      * @return $this
      */
     function fromPathUri(/*iUriPath*/ $path);
