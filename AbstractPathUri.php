@@ -58,5 +58,21 @@ abstract class AbstractPathUri
 
         return $this;
     }
+
+    /**
+     * Reset parts
+     *
+     * @return $this
+     */
+    function reset()
+    {
+        $arrCp = $this->toArray();
+        foreach($arrCp as $key => &$val)
+            $val = null;
+
+        $this->fromArray($arrCp);
+
+        return $this;
+    }
 }
  

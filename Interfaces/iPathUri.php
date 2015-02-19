@@ -15,6 +15,7 @@ interface iPathUri
     /**
      * Build Object From String
      *
+     * - reset object current parts
      * - parse string and build object
      *
      * @param string $pathUri
@@ -27,6 +28,8 @@ interface iPathUri
     /**
      * Build Object From Array
      *
+     * - reset object current parts
+     *
      * @param array $path
      *
      * @throws \InvalidArgumentException
@@ -37,7 +40,9 @@ interface iPathUri
     /**
      * Build Object From PathUri
      *
-     * - it take a instance of pathUri object
+     * - reset object current parts
+     *
+     * note: it take a instance of pathUri object
      *   same as base object
      *
      * @param iPathUri $path
@@ -46,6 +51,13 @@ interface iPathUri
      * @return $this
      */
     function fromPathUri(/*iUriPath*/ $path);
+
+    /**
+     * Reset parts
+     *
+     * @return $this
+     */
+    function reset();
 
     /**
      * Get PathUri Object As String
