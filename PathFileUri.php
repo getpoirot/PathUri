@@ -11,11 +11,6 @@ class PathFileUri extends AbstractPathUri
     protected $path = [];
 
     /**
-     * @var boolean leading dot
-     */
-    protected $leadingDot = false;
-
-    /**
      * Set Filename of file or folder
      *
      * ! without extension
@@ -102,14 +97,15 @@ class PathFileUri extends AbstractPathUri
      */
     function setPath($path)
     {
-        if ($path == null)
+        if ($path == null) {
             // AbstractPathUri::reset
-            $path = [];
+            $this->path = [];
+            return $this;
+        }
 
         if (is_string($path)) {
+            $path = $this->normalizePathStr($path);
             $path = explode(self::DS, $path);
-            if ($path[0] == '.' && !$this->leadingDot)
-                unset ($path[0]);
         }
 
         if (!is_array($path))
@@ -118,9 +114,51 @@ class PathFileUri extends AbstractPathUri
                 , is_object($path) ? get_class($path) : gettype($path)
             ));
 
-        $this->path = $path;
+
+        // :
+        $parts = $this->normalizePathArr($path);
+        $this->path = $parts;
 
         return $this;
+    }
+
+    /**
+     * Normalizes that parent directory references and removes redundant ones.
+     * @param string[] $paths List of parts in the the path
+     * @return string[] Normalized list of paths
+     */
+    protected function normalizePathArr(array $paths)
+    {
+        /*$paths = array_filter($paths, function($p) {
+            if (strpos($p, ':') !== false)
+                throw new \InvalidArgumentException('Invalid path character ":"');
+
+            return $p !== '' && $p !== '.';
+        });*/
+
+        reset($paths); $prevIndex = null;
+        while(in_array('..', $paths, true))
+        {
+            $currIndex = key($paths);
+            $currItem  = current($paths);
+
+            if ($currItem == '..') {
+                if ($prevIndex !== null) {
+                    unset($paths[$prevIndex]);
+                }
+
+                unset($paths[$currIndex]);
+
+                $prevIndex = null;
+                reset($paths);
+                continue;
+            }
+
+            $prevIndex = $currIndex;
+            next($paths);
+        }
+
+        return $paths;
     }
 
     /**
@@ -165,12 +203,9 @@ class PathFileUri extends AbstractPathUri
     function toString()
     {
         $path = $this->joinPath($this->getPath());
-        if ($path === '/' || $path === '')
-            $realpath = $path.$this->getFilename();
-        else
-            $realpath = $path.'/'.$this->getFilename();
 
-        return $this->normalizePath($realpath);
+        // Also sequences slashes removed by normalize
+        return $this->normalizePathStr($path.self::DS.$this->getFilename());
     }
 
     /**
@@ -182,9 +217,9 @@ class PathFileUri extends AbstractPathUri
      */
     function joinPath(array $path)
     {
-        $path = implode(self::DS, $path);
+        $path = $this->normalizePathArr($path);
 
-        return $path;
+        return implode(self::DS, $path);
     }
 
     /**
@@ -219,9 +254,18 @@ class PathFileUri extends AbstractPathUri
      */
     protected function getPathInfo($path)
     {
-        $path = $this->normalizePath($path);
+        $path = $this->normalizePathStr($path);
 
         $ret  = [];
+
+        $exPath = explode(self::DS, $path);
+        if (end($exPath) == '..') {
+            // we have not filename
+            $ret['path'] = $path;
+
+            return $ret;
+        }
+
         $m    = pathinfo($path);
         (!isset($m['dirname']))   ?: $ret['path']      = $m['dirname'];  // For file with name.ext
         (!isset($m['basename']))  ?: $ret['filename']  = $m['basename']; // <= name.ext
@@ -249,21 +293,39 @@ class PathFileUri extends AbstractPathUri
      *
      * @return string
      */
-    protected function normalizePath($path, $stripTrailingSlash = true)
+    protected function normalizePathStr($path, $stripTrailingSlash = true)
     {
         if ($path == '')
-            return '.';
+            return $path;
 
         // convert paths to portables one
-        $path = str_replace('\\', '/', $path);
+        $path = str_replace('\\', self::DS, $path);
 
         // remove sequences of slashes
-        $path = preg_replace('#/{2,}#', '/', $path);
+        $path = preg_replace('#'.self::DS.'{2,}#', self::DS, $path);
 
         //remove trailing slash
-        if ($stripTrailingSlash and strlen($path) > 1 and substr($path, -1, 1) === '/')
+        if ($stripTrailingSlash
+            && strlen($path) > 1
+            && substr($path, -1, 1) === self::DS
+        )
             $path = substr($path, 0, -1);
 
         return $path;
+    }
+
+    /**
+     * Is Absolute Path?
+     *
+     * @return boolean
+     */
+    function isAbsolute()
+    {
+        $p = $this->getPath();
+
+        reset($p);
+        $fi = current($p);
+
+        return $fi === '' || substr($fi, -1) === ':';
     }
 }

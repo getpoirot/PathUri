@@ -75,4 +75,11 @@ interface iPathFileUri extends iPathUri
      * @return array
      */
     function getPath();
-} 
+
+    /**
+     * Is Absolute Path?
+     *
+     * @return boolean
+     */
+    function isAbsolute();
+}
