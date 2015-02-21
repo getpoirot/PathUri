@@ -1,5 +1,5 @@
 <?php
-namespace Poirot\UriPath;
+namespace Poirot\PathUri\Interfaces;
 
 interface iPathUri
 {
@@ -30,12 +30,12 @@ interface iPathUri
      *
      * - reset object current parts
      *
-     * @param array $path
+     * @param array $arrPath
      *
      * @throws \InvalidArgumentException
      * @return $this
      */
-    function fromArray(array $path);
+    function fromArray(array $arrPath);
 
     /**
      * Build Object From PathUri
@@ -62,9 +62,20 @@ interface iPathUri
     /**
      * Get PathUri Object As String
      *
+     * - use join path
+     *
      * @return string
      */
     function toString();
+
+    /**
+     * Join Path
+     *
+     * @param array $path
+     *
+     * @return string
+     */
+    function joinPath(array $path);
 
     /**
      * Get Array In Form Of PathInfo

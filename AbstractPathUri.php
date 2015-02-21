@@ -1,14 +1,17 @@
 <?php
-namespace Poirot\UriPath;
+namespace Poirot\PathUri;
 
 use Poirot\Core\BuilderSetterTrait;
+use Poirot\PathUri\Interfaces\iPathUri;
 
 abstract class AbstractPathUri
     implements iPathUri
 {
     use BuilderSetterTrait {
-        setupFromArray as fromArray;
+        setupFromArray as protected __fromArray;
     }
+
+    private $__reseting;
 
     /**
      * Construct
@@ -38,14 +41,17 @@ abstract class AbstractPathUri
     /**
      * Build Object From PathUri
      *
-     * - it take a instance of pathUri object
+     * - reset object current parts
+     *
+     * note: it take a instance of pathUri object
      *   same as base object
      *
      * @param iPathUri $path
      *
+     * @throws \InvalidArgumentException
      * @return $this
      */
-    function fromPathUri(/*iUriPath*/ $path)
+    function fromPathUri(/*iPathUri*/ $path)
     {
         if (!is_object($path) || ! $path instanceof $this)
             throw new \InvalidArgumentException(sprintf(
@@ -60,17 +66,41 @@ abstract class AbstractPathUri
     }
 
     /**
+     * Build Object From Array
+     *
+     * - reset object current parts
+     *
+     * @param array $arrPath
+     *
+     * @throws \InvalidArgumentException
+     * @return $this
+     */
+    function fromArray(array $arrPath)
+    {
+        if (!$this->__reseting) // recursive fromArray call on reseting
+            $this->reset();
+
+        $this->__fromArray($arrPath);
+
+        return $this;
+    }
+
+    /**
      * Reset parts
      *
      * @return $this
      */
     function reset()
     {
+        $this->__reseting = true; // recursive fromArray call on reseting
+
         $arrCp = $this->toArray();
         foreach($arrCp as $key => &$val)
             $val = null;
 
         $this->fromArray($arrCp);
+
+        $this->__reseting = false;
 
         return $this;
     }
