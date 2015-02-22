@@ -2,40 +2,176 @@
 namespace Poirot\PathUri;
 
 use Poirot\PathUri\Interfaces\iPathFileUri;
+use Poirot\PathUri\Interfaces\iPathJoinedUri;
 
-class PathFileUri extends AbstractPathUri
+class PathFileUri extends PathAbstractUri
     implements iPathFileUri
 {
-    protected $basepath = [];
-    protected $path     = [];
+    protected $pathSep = '/';
+
+    /**
+     * @var iPathJoinedUri
+     */
+    protected $basepath;
+    /**
+     * @var iPathJoinedUri
+     */
+    protected $filepath;
     protected $basename;
     protected $extension;
 
+    protected $pathMode = self::PATH_AS_ABSOLUTE;
+
+    protected $allowOverrideBase = true;
+
     /**
-     * @var bool
+     * Set Path Separator
+     *
+     * @param string $sep
+     *
+     * @return $this
      */
-    protected $overrideBasepath = false;
+    function setPathSeparator($sep)
+    {
+        $this->pathSep = (string) $sep;
+
+        return $this;
+    }
+
+    /**
+     * Get Path Separator
+     *
+     * @return string
+     */
+    function getPathSeparator()
+    {
+        return $this->pathSep;
+    }
+
+    /**
+     * Build Object From String
+     *
+     * - parse string to associateArray setter
+     *
+     * @param string $pathStr
+     *
+     * @throws \InvalidArgumentException
+     * @return array
+     */
+    function parse($pathStr)
+    {
+        if (!is_string($pathStr))
+            throw new \InvalidArgumentException(sprintf(
+                'PathStr must be string but "%s" given.'
+                , is_object($pathStr) ? get_class($pathStr) : gettype($pathStr)
+            ));
+
+        $path = $this->normalizePathStr($pathStr);
+
+        // check the given path has file info .. {
+        $pathJoin = new PathJoinUri([
+            'path'      => $path,
+            'separator' => $this->getPathSeparator(),
+        ]);
+
+        $tmpPath = $pathJoin->toArray()['path'];
+        if (end($tmpPath) == '..') {
+            // we have not filename
+            $ret['path'] = $pathJoin;
+
+            return $ret;
+        }
+        // ... }
+
+        $m    = pathinfo($path);
+        (!isset($m['dirname']))   ?: $ret['path']      = $m['dirname'];  // For paths that has xxx.xx
+        (!isset($m['basename']))  ?: $ret['filename']  = $m['basename']; // <= name.ext
+        (!isset($m['filename']))  ?: $ret['basename']  = $m['filename']; // <= name
+        (!isset($m['extension'])) ?: $ret['extension'] = $m['extension'];
+
+        if (isset($ret['extension']) && $ret['filename'] === '') {
+            // for folders similar to .ssh
+            unset($ret['extension']);
+
+            $ret['filename'] = $ret['basename'];
+        }
+
+        if ($ret['path'] === '.' || $ret['path'] === '')
+            unset($ret['path']);
+        else
+            // build pathJoin object
+            $ret['path'] = $pathJoin->fromArray([
+                'path' => $ret['path']
+            ]);
+
+        return $ret;
+    }
+
+    /**
+     * Is Absolute Path?
+     *
+     * @return boolean
+     */
+    function isAbsolute()
+    {
+        // TODO: Implement isAbsolute() method.
+    }
+
+    /**
+     * Get Array In Form Of PathInfo
+     *
+     * return [
+     *  'basepath'  => iPathJoinedUri,
+     *  'filepath'  => iPathJoinedUri,
+     *  'basename'  => 'name_with', # without extension
+     *  'extension' => 'ext',
+     *  'filename'  => 'name_with.ext',
+     * ]
+     *
+     * @return array
+     */
+    function toArray()
+    {
+        return [
+            'basepath'  => $this->getBasepath(),
+            'filepath'  => $this->getFilepath(),
+            'basename'  => $this->getBasename(),
+            'extension' => $this->getExtension(),
+            'filename'  => $this->getFilename(),
+        ];
+    }
+
+    /**
+     * Get Assembled Path As String
+     *
+     * @return string
+     */
+    function toString()
+    {
+        // TODO: Implement toString() method.
+        $base = $this->joinPath($this->getBasepath());
+        $path = $this->joinPath($this->getPath());
+
+        // Also sequences slashes removed by normalize
+        $realPathname = $this->normalizePathStr(
+            $base.
+            $path.self::DS.
+            $this->getFilename()
+        );
+
+        return $realPathname;
+    }
 
     /**
      * Set Base Path
      *
-     * @param array|string $path
+     * @param iPathJoinedUri $pathUri
      *
-     * @throws \Exception
      * @return $this
      */
-    function setBasepath($path)
+    function setBasepath(iPathJoinedUri $pathUri)
     {
-        if (is_string($path))
-            // Set Path From String
-            $path = (new PathFileUri)
-                ->setPath($path)
-                ->getPath();
-
-        if (!is_array($path))
-            throw new \Exception('Path must be a string or array.');
-
-        $this->basepath = $path;
+        $this->basepath = $pathUri;
 
         return $this;
     }
@@ -43,10 +179,18 @@ class PathFileUri extends AbstractPathUri
     /**
      * Get Base Path
      *
-     * @return array
+     * - override path separator from this class
+     * - create new empty path instance if not set
+     *
+     * @return iPathJoinedUri
      */
     function getBasepath()
     {
+        if (!$this->basepath)
+            $this->basepath = new PathJoinUri(['path' => '']);
+
+        $this->basepath->setSeparator($this->getPathSeparator());
+
         return $this->basepath;
     }
 
@@ -61,9 +205,9 @@ class PathFileUri extends AbstractPathUri
      *
      * @return $this
      */
-    function setOverrideBasepath($flag)
+    function allowOverrideBasepath($flag = true)
     {
-        $this->overrideBasepath = (boolean) $flag;
+        $this->allowOverrideBase = (boolean) $flag;
 
         return $this;
     }
@@ -75,7 +219,7 @@ class PathFileUri extends AbstractPathUri
      */
     function hasOverrideBasepath()
     {
-        return $this->overrideBasepath;
+        return $this->allowOverrideBase;
     }
 
     /**
@@ -136,6 +280,38 @@ class PathFileUri extends AbstractPathUri
     }
 
     /**
+     * Set Path To File/Directory
+     *
+     * @param iPathJoinedUri $pathUri
+     *
+     * @return $this
+     */
+    function setFilepath(iPathJoinedUri $pathUri)
+    {
+        $this->filepath = $pathUri;
+
+        return $this;
+    }
+
+    /**
+     * Gets the path without filename
+     *
+     * - override path separator from this class
+     * - create new empty path instance if not set
+     *
+     * @return iPathJoinedUri
+     */
+    function getFilepath()
+    {
+        if (!$this->filepath)
+            $this->filepath = new PathJoinUri(['path' => '']);
+
+        $this->filepath->setSeparator($this->getPathSeparator());
+
+        return $this->filepath;
+    }
+
+    /**
      * Get Filename Include File Extension
      *
      * ! It's a combination of basename+'.'.extension
@@ -154,157 +330,60 @@ class PathFileUri extends AbstractPathUri
     }
 
     /**
-     * Set Path
+     * Set Display Full Path Mode
      *
-     * - path array in form of ['path', 'to', 'dir']
+     * @param self ::PATH_AS_ABSOLUTE
+     *       |self::PATH_AS_RELATIVE $mode
      *
-     * @param array|string $path Path To File/Folder
-     *
-     * @throws \Exception
      * @return $this
      */
-    function setPath($path)
+    function setPathStrMode($mode)
     {
-        if ($path == null) {
-            // AbstractPathUri::reset
-            $this->path = [];
-            return $this;
-        }
-
-        if (is_string($path)) {
-            $path = $this->normalizePathStr($path);
-            $path = explode(self::DS, $path);
-        }
-
-        if (!is_array($path))
-            throw new \Exception(sprintf(
-                'Path Must Be Array Or String, "%s" given.'
-                , is_object($path) ? get_class($path) : gettype($path)
+        if(!in_array($mode, [self::PATH_AS_ABSOLUTE, self::PATH_AS_RELATIVE]))
+            throw new \InvalidArgumentException(sprintf(
+                'Invalid Path Display Mode, given "%s".'
+                , is_object($mode) ? get_class($mode) : gettype($mode)
             ));
 
-
-        // :
-        $parts = $this->normalizePathArr($path);
-        $this->path = $parts;
+        $this->pathMode = $mode;
 
         return $this;
     }
 
     /**
-     * Gets the path without filename
+     * Get Display Path Mode
      *
-     * - return in form of ['path', 'to', 'dir']
+     * - used by toString method
      *
-     * @return array
+     * @return self::PATH_AS_RELATIVE | self::PATH_AS_ABSOLUTE
      */
-    function getPath()
+    function getPathStrMode()
     {
-        return $this->path;
+        return $this->pathMode;
     }
 
-    /**
-     * Build Object From String
-     *
-     * - reset object current parts
-     * - parse string and build object
-     *
-     * @param string $pathUri
-     *
-     * @throws \InvalidArgumentException
-     * @return $this
-     */
-    function fromString($pathUri)
-    {
-        $path = [];
-        if (is_string($pathUri))
-            $path = $this->getPathInfo($pathUri);
-
-        $this->fromArray($path);
-
-        return $this;
-    }
+    // In Methods Usage:
 
     /**
-     * Get PathUri Object As String
+     * Fix common problems with a file path
+     *
+     * @param string $path
+     * @param bool   $stripTrailingSlash
      *
      * @return string
      */
-    function getRealPathname()
+    protected function normalizePathStr($path, $stripTrailingSlash = true)
     {
-        $path = $this->joinPath($this->getPath());
+        $separator = $this->getFilepath()->getSeparator();
 
-        // Also sequences slashes removed by normalize
-        $realPathname = $this->normalizePathStr($path.self::DS.$this->getFilename());
+        // convert paths to portables one
+        $path = Util::normalizeUnixPath(
+            str_replace('\\', $separator, $path)
+            , $separator
+            , $stripTrailingSlash
+        );
 
-        return $realPathname;
-    }
-
-    /**
-     * Get Relative Path To Basepath
-     *
-     * - with overrideBasepath flag
-     *   if basepath was set we can't go
-     *   further back in basepath.
-     *   [/base]/../directory for second part
-     *   will always return /
-     *
-     * @return string
-     */
-    function getRelativePathname()
-    {
-        // TODO: Implement getRelativePathname() method.
-    }
-
-    /**
-     * Join Path
-     *
-     * @param array $path
-     *
-     * @return string
-     */
-    function joinPath(array $path)
-    {
-        $path = $this->normalizePathArr($path);
-
-        return implode(self::DS, $path);
-    }
-
-    /**
-     * Get Array In Form Of PathInfo
-     *
-     * return [
-     *  'path'      => ['path', 'to', 'dir'],
-     *  'impath'    => 'path/to/dir',
-     *  'basename'  => 'name_with', # without extension
-     *  'extension' => 'ext',
-     *  'filename'  => 'name_with.ext',
-     * ]
-     *
-     * @return array
-     */
-    function toArray()
-    {
-        return [
-            'path'      => $this->getPath(),
-            'basename'  => $this->getBasename(),
-            'extension' => $this->getExtension(),
-            'filename'  => $this->getFilename(),
-        ];
-    }
-
-    /**
-     * Is Absolute Path?
-     *
-     * @return boolean
-     */
-    function isAbsolute()
-    {
-        $p = $this->getPath();
-
-        reset($p);
-        $fi = current($p);
-
-        return $fi === '' || substr($fi, -1) === ':';
+        return $path;
     }
 
     /**
@@ -346,74 +425,5 @@ class PathFileUri extends AbstractPathUri
         }
 
         return $paths;
-    }
-
-    /**
-     * Extract Path Info
-     *
-     * @param string $path
-     *
-     * @return array
-     */
-    protected function getPathInfo($path)
-    {
-        $path = $this->normalizePathStr($path);
-
-        $ret  = [];
-
-        $exPath = explode(self::DS, $path);
-        if (end($exPath) == '..') {
-            // we have not filename
-            $ret['path'] = $path;
-
-            return $ret;
-        }
-
-        $m    = pathinfo($path);
-        (!isset($m['dirname']))   ?: $ret['path']      = $m['dirname'];  // For file with name.ext
-        (!isset($m['basename']))  ?: $ret['filename']  = $m['basename']; // <= name.ext
-        (!isset($m['filename']))  ?: $ret['basename']  = $m['filename']; // <= name
-        (!isset($m['extension'])) ?: $ret['extension'] = $m['extension'];
-
-        if (isset($ret['extension']) && $ret['filename'] === '') {
-            // for folders similar to .ssh
-            unset($ret['extension']);
-
-            $ret['filename'] = $ret['basename'];
-        }
-
-        if ($ret['path'] === '.' || $ret['path'] === '')
-            unset($ret['path']);
-
-        return $ret;
-    }
-
-    /**
-     * Fix common problems with a file path
-     *
-     * @param string $path
-     * @param bool   $stripTrailingSlash
-     *
-     * @return string
-     */
-    protected function normalizePathStr($path, $stripTrailingSlash = true)
-    {
-        if ($path == '')
-            return $path;
-
-        // convert paths to portables one
-        $path = str_replace('\\', self::DS, $path);
-
-        // remove sequences of slashes
-        $path = preg_replace('#'.self::DS.'{2,}#', self::DS, $path);
-
-        //remove trailing slash
-        if ($stripTrailingSlash
-            && strlen($path) > 1
-            && substr($path, -1, 1) === self::DS
-        )
-            $path = substr($path, 0, -1);
-
-        return $path;
     }
 }

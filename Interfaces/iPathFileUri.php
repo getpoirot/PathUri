@@ -1,9 +1,76 @@
 <?php
 namespace Poirot\PathUri\Interfaces;
 
-interface iPathFileUri extends iPathUri
+/**
+ * When you need to know path separator everywhere
+ * on this class, you have to catch it from getPath()
+ * of this class
+ *
+ */
+interface iPathFileUri extends iPathAbstractUri
 {
-    const DS = DIRECTORY_SEPARATOR;
+    const PATH_AS_ABSOLUTE = 'display.absolute.include.basepath';
+    const PATH_AS_RELATIVE = 'display.relative.without.basepath';
+
+    /**
+     * Set Path Separator
+     *
+     * @param string $sep
+     *
+     * @return $this
+     */
+    function setPathSeparator($sep);
+
+    /**
+     * Get Path Separator
+     *
+     * @return string
+     */
+    function getPathSeparator();
+
+    /**
+     * Set Base Path
+     *
+     * - override path separator from this class
+     *
+     * @param iPathJoinedUri $pathUri
+     *
+     * @return $this
+     */
+    function setBasepath(iPathJoinedUri $pathUri);
+
+    /**
+     * Get Base Path
+     *
+     * - override path separator from this class
+     * - create new empty path instance if not set
+     *
+     * @return iPathJoinedUri
+     */
+    function getBasepath();
+
+    /**
+     * Set Allow Override Basepath
+     *
+     * - this will used on method:
+     *   @see getRelativePathname
+     *
+     *
+     * @param boolean $flag
+     *
+     * @return $this
+     */
+    function allowOverrideBasepath($flag = true);
+
+    /**
+     * Has Override Basepath?
+     *
+     * @return boolean
+     */
+    function hasOverrideBasepath();
+
+
+    // File/Dir Methods:
 
     /**
      * Set Filename of file or folder
@@ -47,6 +114,27 @@ interface iPathFileUri extends iPathUri
     function getExtension();
 
     /**
+     * Set Path To File/Directory
+     *
+     * @param iPathJoinedUri $pathUri
+     *
+     * @return $this
+     */
+    function setFilepath(iPathJoinedUri $pathUri);
+
+    /**
+     * Gets the path without filename
+     *
+     * - override path separator from this class
+     * - create new empty path instance if not set
+     *
+     * @return iPathJoinedUri
+     */
+    function getFilepath();
+
+    // Helpers:
+
+    /**
      * Get Filename Include File Extension
      *
      * ! It's a combination of basename+'.'.extension
@@ -57,29 +145,21 @@ interface iPathFileUri extends iPathUri
     function getFilename();
 
     /**
-     * Set Path
+     * Set Display Full Path Mode
      *
-     * - in form of ['path', 'to', 'dir']
-     *
-     * @param array|string $path Path To File/Folder
+     * @param self::PATH_AS_ABSOLUTE
+     *       |self::PATH_AS_RELATIVE $mode
      *
      * @return $this
      */
-    function setPath($path);
+    function setPathStrMode($mode);
 
     /**
-     * Gets the path without filename
+     * Get Display Path Mode
      *
-     * - return in form of ['path', 'to', 'dir']
+     * - used by toString method
      *
-     * @return array
+     * @return self::PATH_AS_RELATIVE | self::PATH_AS_ABSOLUTE
      */
-    function getPath();
-
-    /**
-     * Is Absolute Path?
-     *
-     * @return boolean
-     */
-    function isAbsolute();
+    function getPathStrMode();
 }
