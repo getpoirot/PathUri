@@ -13,6 +13,22 @@ interface iPathUri
     public function __construct($uri = null);
 
     /**
+     * Set Base Path
+     *
+     * @param array|string $path
+     *
+     * @return $this
+     */
+    function setBasepath($path);
+
+    /**
+     * Get Base Path
+     *
+     * @return array
+     */
+    function getBasepath();
+
+    /**
      * Build Object From String
      *
      * - reset object current parts
@@ -60,13 +76,54 @@ interface iPathUri
     function reset();
 
     /**
-     * Get PathUri Object As String
+     * Set Allow Override Basepath
      *
-     * - use join path
+     * - this will used on method:
+     *   @see getRelativePathname
+     *
+     *
+     * @param boolean $flag
+     *
+     * @return $this
+     */
+    function setOverrideBasepath($flag);
+
+    /**
+     * Has Override Basepath?
+     *
+     * @return boolean
+     */
+    function hasOverrideBasepath();
+
+    /**
+     * Get Real Path File Name With Basepath included
+     *
+     * - it will manipulate basepath
+     *   for exp. in case of [/base]/../
+     *   it remain /
+     *
+     * - with overrideBasepath flag
+     *   if basepath was set we can't go
+     *   further back in basepath.
+     *   [/base]/../directory for second part
+     *   will always return /
      *
      * @return string
      */
-    function toString();
+    function getRealPathname();
+
+    /**
+     * Get Relative Path To Basepath
+     *
+     * - with overrideBasepath flag
+     *   if basepath was set we can't go
+     *   further back in basepath.
+     *   [/base]/../directory for second part
+     *   will always return /
+     *
+     * @return string
+     */
+    function getRelativePathname();
 
     /**
      * Join Path

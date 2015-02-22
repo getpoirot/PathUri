@@ -6,9 +6,77 @@ use Poirot\PathUri\Interfaces\iPathFileUri;
 class PathFileUri extends AbstractPathUri
     implements iPathFileUri
 {
+    protected $basepath = [];
+    protected $path     = [];
     protected $basename;
     protected $extension;
-    protected $path = [];
+
+    /**
+     * @var bool
+     */
+    protected $overrideBasepath = false;
+
+    /**
+     * Set Base Path
+     *
+     * @param array|string $path
+     *
+     * @throws \Exception
+     * @return $this
+     */
+    function setBasepath($path)
+    {
+        if (is_string($path))
+            // Set Path From String
+            $path = (new PathFileUri)
+                ->setPath($path)
+                ->getPath();
+
+        if (!is_array($path))
+            throw new \Exception('Path must be a string or array.');
+
+        $this->basepath = $path;
+
+        return $this;
+    }
+
+    /**
+     * Get Base Path
+     *
+     * @return array
+     */
+    function getBasepath()
+    {
+        return $this->basepath;
+    }
+
+    /**
+     * Set Allow Override Basepath
+     *
+     * - this will used on method:
+     * @see getRelativePathname
+     *
+     *
+     * @param boolean $flag
+     *
+     * @return $this
+     */
+    function setOverrideBasepath($flag)
+    {
+        $this->overrideBasepath = (boolean) $flag;
+
+        return $this;
+    }
+
+    /**
+     * Has Override Basepath?
+     *
+     * @return boolean
+     */
+    function hasOverrideBasepath()
+    {
+        return $this->overrideBasepath;
+    }
 
     /**
      * Set Filename of file or folder
@@ -52,7 +120,7 @@ class PathFileUri extends AbstractPathUri
      */
     function setExtension($ext)
     {
-        $this->extension = $ext;
+        $this->extension = (string) $ext;
 
         return $this;
     }
@@ -123,45 +191,6 @@ class PathFileUri extends AbstractPathUri
     }
 
     /**
-     * Normalizes that parent directory references and removes redundant ones.
-     * @param string[] $paths List of parts in the the path
-     * @return string[] Normalized list of paths
-     */
-    protected function normalizePathArr(array $paths)
-    {
-        /*$paths = array_filter($paths, function($p) {
-            if (strpos($p, ':') !== false)
-                throw new \InvalidArgumentException('Invalid path character ":"');
-
-            return $p !== '' && $p !== '.';
-        });*/
-
-        reset($paths); $prevIndex = null;
-        while(in_array('..', $paths, true))
-        {
-            $currIndex = key($paths);
-            $currItem  = current($paths);
-
-            if ($currItem == '..') {
-                if ($prevIndex !== null) {
-                    unset($paths[$prevIndex]);
-                }
-
-                unset($paths[$currIndex]);
-
-                $prevIndex = null;
-                reset($paths);
-                continue;
-            }
-
-            $prevIndex = $currIndex;
-            next($paths);
-        }
-
-        return $paths;
-    }
-
-    /**
      * Gets the path without filename
      *
      * - return in form of ['path', 'to', 'dir']
@@ -200,12 +229,30 @@ class PathFileUri extends AbstractPathUri
      *
      * @return string
      */
-    function toString()
+    function getRealPathname()
     {
         $path = $this->joinPath($this->getPath());
 
         // Also sequences slashes removed by normalize
-        return $this->normalizePathStr($path.self::DS.$this->getFilename());
+        $realPathname = $this->normalizePathStr($path.self::DS.$this->getFilename());
+
+        return $realPathname;
+    }
+
+    /**
+     * Get Relative Path To Basepath
+     *
+     * - with overrideBasepath flag
+     *   if basepath was set we can't go
+     *   further back in basepath.
+     *   [/base]/../directory for second part
+     *   will always return /
+     *
+     * @return string
+     */
+    function getRelativePathname()
+    {
+        // TODO: Implement getRelativePathname() method.
     }
 
     /**
@@ -243,6 +290,62 @@ class PathFileUri extends AbstractPathUri
             'extension' => $this->getExtension(),
             'filename'  => $this->getFilename(),
         ];
+    }
+
+    /**
+     * Is Absolute Path?
+     *
+     * @return boolean
+     */
+    function isAbsolute()
+    {
+        $p = $this->getPath();
+
+        reset($p);
+        $fi = current($p);
+
+        return $fi === '' || substr($fi, -1) === ':';
+    }
+
+    /**
+     * Normalizes that parent directory references and removes redundant ones.
+     *
+     * @param string[] $paths List of parts in the the path
+     *
+     * @return string[] Normalized list of paths
+     */
+    protected function normalizePathArr(array $paths)
+    {
+        /*$paths = array_filter($paths, function($p) {
+            if (strpos($p, ':') !== false)
+                throw new \InvalidArgumentException('Invalid path character ":"');
+
+            return $p !== '' && $p !== '.';
+        });*/
+
+        reset($paths); $prevIndex = null;
+        while(in_array('..', $paths, true))
+        {
+            $currIndex = key($paths);
+            $currItem  = current($paths);
+
+            if ($currItem == '..') {
+                if ($prevIndex !== null) {
+                    unset($paths[$prevIndex]);
+                }
+
+                unset($paths[$currIndex]);
+
+                $prevIndex = null;
+                reset($paths);
+                continue;
+            }
+
+            $prevIndex = $currIndex;
+            next($paths);
+        }
+
+        return $paths;
     }
 
     /**
@@ -312,20 +415,5 @@ class PathFileUri extends AbstractPathUri
             $path = substr($path, 0, -1);
 
         return $path;
-    }
-
-    /**
-     * Is Absolute Path?
-     *
-     * @return boolean
-     */
-    function isAbsolute()
-    {
-        $p = $this->getPath();
-
-        reset($p);
-        $fi = current($p);
-
-        return $fi === '' || substr($fi, -1) === ':';
     }
 }
