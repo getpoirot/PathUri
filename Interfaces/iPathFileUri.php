@@ -31,13 +31,17 @@ interface iPathFileUri extends iPathAbstractUri
     /**
      * Set Base Path
      *
-     * - override path separator from this class
+     * - with setting basepath value
+     *   the path mode changed to AS_ABSOLUTE
+     *   and it can be changed by setPathStrMode
+     *   later
      *
-     * @param iPathJoinedUri $pathUri
+     * @param iPathJoinedUri|string $pathUri
      *
+     * @throws \InvalidArgumentException
      * @return $this
      */
-    function setBasepath(iPathJoinedUri $pathUri);
+    function setBasepath($pathUri);
 
     /**
      * Get Base Path
@@ -116,11 +120,11 @@ interface iPathFileUri extends iPathAbstractUri
     /**
      * Set Path To File/Directory
      *
-     * @param iPathJoinedUri $pathUri
+     * @param iPathJoinedUri|string $pathUri
      *
      * @return $this
      */
-    function setFilepath(iPathJoinedUri $pathUri);
+    function setFilepath($pathUri);
 
     /**
      * Gets the path without filename

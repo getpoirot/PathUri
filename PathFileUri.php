@@ -20,7 +20,15 @@ class PathFileUri extends PathAbstractUri
     protected $basename;
     protected $extension;
 
-    protected $pathMode = self::PATH_AS_ABSOLUTE;
+    /**
+     * always default is relative
+     *
+     * @see getPathStrMode
+     * @see setBasepath
+     *
+     * @var string
+     */
+    protected $pathMode = self::PATH_AS_RELATIVE;
 
     protected $allowOverrideBase = true;
 
@@ -114,7 +122,14 @@ class PathFileUri extends PathAbstractUri
      */
     function isAbsolute()
     {
-        // TODO: Implement isAbsolute() method.
+        if ($this->getPathStrMode() == self::PATH_AS_ABSOLUTE)
+            return true;
+
+        $filePath = clone $this->getFilepath();
+        $path = $filePath->normalize()
+            ->toArray()['path'];
+
+        return ($path[0] == '');
     }
 
     /**
@@ -148,15 +163,15 @@ class PathFileUri extends PathAbstractUri
      */
     function toString()
     {
-        // TODO: Implement toString() method.
-        $base = $this->joinPath($this->getBasepath());
-        $path = $this->joinPath($this->getPath());
+        $finalPath = clone $this->getFilepath();
+        if ($this->getPathStrMode() === self::PATH_AS_ABSOLUTE)
+            $finalPath = $finalPath->prepend($this->getBasepath());
 
         // Also sequences slashes removed by normalize
         $realPathname = $this->normalizePathStr(
-            $base.
-            $path.self::DS.
-            $this->getFilename()
+            $finalPath->normalize()->toString()
+            .$this->getPathSeparator()
+            .$this->getFilename()
         );
 
         return $realPathname;
@@ -165,13 +180,34 @@ class PathFileUri extends PathAbstractUri
     /**
      * Set Base Path
      *
-     * @param iPathJoinedUri $pathUri
+     * - with setting basepath value
+     *   the path mode changed to AS_ABSOLUTE
+     *   and it can be changed by setPathStrMode
+     *   later
      *
+     * @param iPathJoinedUri|string $pathUri
+     *
+     * @throws \InvalidArgumentException
      * @return $this
      */
-    function setBasepath(iPathJoinedUri $pathUri)
+    function setBasepath($pathUri)
     {
+        if (is_string($pathUri))
+            $pathUri = new PathJoinUri([
+                'path'      => Util::normalizeUnixPath($pathUri),
+                'separator' => $this->getPathSeparator(),
+            ]);
+        elseif ($pathUri instanceof iPathJoinedUri)
+            $pathUri->setSeparator($this->getPathSeparator());
+        else
+            throw new \InvalidArgumentException(sprintf(
+                'PathUti must be string or instanceof iPathJoinedUri, given: %s'
+                , is_object($pathUri) ? get_class($pathUri) : gettype($pathUri)
+            ));
+
         $this->basepath = $pathUri;
+
+        $this->setPathStrMode(self::PATH_AS_ABSOLUTE);
 
         return $this;
     }
@@ -282,12 +318,25 @@ class PathFileUri extends PathAbstractUri
     /**
      * Set Path To File/Directory
      *
-     * @param iPathJoinedUri $pathUri
+     * @param iPathJoinedUri|string $pathUri
      *
      * @return $this
      */
-    function setFilepath(iPathJoinedUri $pathUri)
+    function setFilepath($pathUri)
     {
+        if (is_string($pathUri))
+            $pathUri = new PathJoinUri([
+                'path'      => Util::normalizeUnixPath($pathUri),
+                'separator' => $this->getPathSeparator(),
+            ]);
+        elseif ($pathUri instanceof iPathJoinedUri)
+            $pathUri->setSeparator($this->getPathSeparator());
+        else
+            throw new \InvalidArgumentException(sprintf(
+                'PathUti must be string or instanceof iPathJoinedUri, given: %s'
+                , is_object($pathUri) ? get_class($pathUri) : gettype($pathUri)
+            ));
+
         $this->filepath = $pathUri;
 
         return $this;
@@ -327,6 +376,18 @@ class PathFileUri extends PathAbstractUri
         return ($extension === '' || $extension === null)
             ? $filename
             : $filename.'.'.$extension;
+    }
+
+    /**
+     * Normalize Array Path Stored On Class
+     *
+     * @return $this
+     */
+    function normalize()
+    {
+        // TODO: Implement normalize() method.
+
+        return $this;
     }
 
     /**
@@ -378,52 +439,11 @@ class PathFileUri extends PathAbstractUri
 
         // convert paths to portables one
         $path = Util::normalizeUnixPath(
-            str_replace('\\', $separator, $path)
+            $path
             , $separator
             , $stripTrailingSlash
         );
 
         return $path;
-    }
-
-    /**
-     * Normalizes that parent directory references and removes redundant ones.
-     *
-     * @param string[] $paths List of parts in the the path
-     *
-     * @return string[] Normalized list of paths
-     */
-    protected function normalizePathArr(array $paths)
-    {
-        /*$paths = array_filter($paths, function($p) {
-            if (strpos($p, ':') !== false)
-                throw new \InvalidArgumentException('Invalid path character ":"');
-
-            return $p !== '' && $p !== '.';
-        });*/
-
-        reset($paths); $prevIndex = null;
-        while(in_array('..', $paths, true))
-        {
-            $currIndex = key($paths);
-            $currItem  = current($paths);
-
-            if ($currItem == '..') {
-                if ($prevIndex !== null) {
-                    unset($paths[$prevIndex]);
-                }
-
-                unset($paths[$currIndex]);
-
-                $prevIndex = null;
-                reset($paths);
-                continue;
-            }
-
-            $prevIndex = $currIndex;
-            next($paths);
-        }
-
-        return $paths;
     }
 }

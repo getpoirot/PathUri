@@ -76,6 +76,13 @@ interface iPathAbstractUri
     function toArray();
 
     /**
+     * Normalize Array Path Stored On Class
+     *
+     * @return $this
+     */
+    function normalize();
+
+    /**
      * Get Assembled Path As String
      *
      * @return string

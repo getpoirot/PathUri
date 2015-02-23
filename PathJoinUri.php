@@ -30,6 +30,11 @@ class PathJoinUri extends PathAbstractUri
     ];
     // ... }
 
+    /**
+     * Empty Array Path Means We Have No Path
+     *
+     * @var array
+     */
     protected $path = [];
 
     protected $separator = '/';
@@ -43,10 +48,12 @@ class PathJoinUri extends PathAbstractUri
     }
 
     /**
-     * note: in case of string path using separator
-     *       to build an array
+     * - Null Or Empty Array Means We Have No Path
      *
-     * @param array|string $arrPath
+     * note: in case of string path using separator
+     *       to explode and build an array
+     *
+     * @param array|string|null $arrPath
      *
      * @return $this
      */
@@ -54,6 +61,15 @@ class PathJoinUri extends PathAbstractUri
     {
         if (is_string($arrPath))
             $arrPath = $this->parse($arrPath);
+
+        if ($arrPath === null)
+            $arrPath = [];
+
+        if (!is_array($arrPath))
+            throw new \InvalidArgumentException(sprintf(
+                'Path must be a string, null, or array, but given "%s".'
+                , is_object($arrPath) ? get_class($arrPath) : gettype($arrPath)
+            ));
 
         // the associate array is useless
         $this->path = array_values($arrPath);
@@ -124,8 +140,7 @@ class PathJoinUri extends PathAbstractUri
      */
     function toString()
     {
-        $separator = $this->getSeparator();
-        $return    = $separator . implode( $this->getSeparator(), $this->getPath() );
+        $return    = implode( $this->getSeparator(), $this->getPath() );
 
         return $return;
     }
@@ -155,6 +170,51 @@ class PathJoinUri extends PathAbstractUri
     }
 
     /**
+     * Normalize Array Path Stored On Class
+     *
+     * @return $this
+     */
+    function normalize()
+    {
+        $paths = $this->getPath();
+        if (!$paths)
+            return $this;
+
+        /*$paths = array_filter($paths, function($p) {
+            if (strpos($p, ':') !== false)
+                throw new \InvalidArgumentException('Invalid path character ":"');
+
+            return $p !== '' && $p !== '.';
+        });*/
+
+        reset($paths); $prevIndex = null;
+        while(in_array('..', $paths, true))
+        {
+            $currIndex = key($paths);
+            $currItem  = current($paths);
+
+            if ($currItem == '..') {
+                if ($prevIndex !== null) {
+                    unset($paths[$prevIndex]);
+                }
+
+                unset($paths[$currIndex]);
+
+                $prevIndex = null;
+                reset($paths);
+                continue;
+            }
+
+            $prevIndex = $currIndex;
+            next($paths);
+        }
+
+        $this->setPath($paths);
+
+        return $this;
+    }
+
+    /**
      * Append Path
      *
      * @param iPathAbstractUri $pathUri
@@ -163,7 +223,8 @@ class PathJoinUri extends PathAbstractUri
      */
     function append($pathUri)
     {
-        // TODO: Implement append() method.
+
+        return $this;
     }
 
     /**

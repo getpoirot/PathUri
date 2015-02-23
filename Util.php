@@ -17,6 +17,8 @@ class Util
         if ($path == '')
             return $path;
 
+        $path = str_replace('\\', $separator, $path);
+
         // remove sequences of slashes
         $path = preg_replace('#'.$separator.'{2,}#', $separator, $path);
 
