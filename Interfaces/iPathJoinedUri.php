@@ -22,6 +22,8 @@ interface iPathJoinedUri extends iPathAbstractUri
     /**
      * Append Path
      *
+     * - manipulate current path
+     *
      * @param iPathAbstractUri $pathUri
      *
      * @return $this
@@ -31,6 +33,8 @@ interface iPathJoinedUri extends iPathAbstractUri
     /**
      * Prepend Path
      *
+     * - manipulate current path
+     *
      * @param iPathAbstractUri $pathUri
      *
      * @return $this
@@ -39,13 +43,14 @@ interface iPathJoinedUri extends iPathAbstractUri
 
     /**
      * Mask Given PathUri with Current Path
-     * And Return New Object Of Difference
      *
      * /var/www/html <=> /var/www/ ===> /html
      *
+     * - manipulate current path
+     *
      * @param iPathAbstractUri $pathUri
      *
-     * @return iPathAbstractUri
+     * @return $this
      */
     function mask($pathUri);
 }

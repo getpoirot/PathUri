@@ -99,6 +99,8 @@ class PathJoinUri extends PathAbstractUri
                 , is_object($pathStr) ? get_class($pathStr) : gettype($pathStr)
             ));
 
+        $pathStr = Util::normalizeUnixPath($pathStr, $this->getSeparator());
+
         return [ 'path' => explode($this->getSeparator(), $pathStr) ];
     }
 
@@ -221,6 +223,8 @@ class PathJoinUri extends PathAbstractUri
     /**
      * Append Path
      *
+     * - manipulate current path
+     *
      * @param iPathAbstractUri $pathUri
      *
      * @return $this
@@ -246,6 +250,8 @@ class PathJoinUri extends PathAbstractUri
     /**
      * Prepend Path
      *
+     * - manipulate current path
+     *
      * @param iPathAbstractUri $pathUri
      *
      * @return $this
@@ -261,17 +267,25 @@ class PathJoinUri extends PathAbstractUri
 
     /**
      * Mask Given PathUri with Current Path
-     * And Return New Object Of Difference
      *
      * /var/www/html <=> /var/www/ ===> /html
      *
+     * - manipulate current path
+     *
      * @param iPathAbstractUri $pathUri
      *
-     * @return iPathAbstractUri
+     * @return $this
      */
     function mask($pathUri)
     {
-        // TODO: Implement mask() method.
+         (count($pathUri->getPath()) >= count($this->getPath()))
+            ? ( $muchLength = $pathUri->getPath() and $less = $this->getPath() )
+            : ( $muchLength = $this->getPath()    and $less = $pathUri->getPath() )
+         ;
+
+        print(array_intersect($muchLength, $less));
+
+        return $this;
     }
 }
  
