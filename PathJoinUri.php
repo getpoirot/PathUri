@@ -60,7 +60,7 @@ class PathJoinUri extends PathAbstractUri
     protected function setPath($arrPath)
     {
         if (is_string($arrPath))
-            $arrPath = $this->parse($arrPath);
+            $arrPath = $this->parse($arrPath)['path'];
 
         if ($arrPath === null)
             $arrPath = [];
@@ -83,6 +83,8 @@ class PathJoinUri extends PathAbstractUri
      * Build Object From String
      *
      * - parse string to associateArray setter
+     * - return value of this method must can be
+     *   used as an argument for fromArray
      *
      * @param string $pathStr
      *
@@ -97,7 +99,7 @@ class PathJoinUri extends PathAbstractUri
                 , is_object($pathStr) ? get_class($pathStr) : gettype($pathStr)
             ));
 
-        return explode($this->getSeparator(), $pathStr);
+        return [ 'path' => explode($this->getSeparator(), $pathStr) ];
     }
 
     /**
@@ -136,13 +138,15 @@ class PathJoinUri extends PathAbstractUri
     /**
      * Get Assembled Path As String
      *
+     * - the path must normalized before output
+     *
      * @return string
      */
     function toString()
     {
-        $return    = implode( $this->getSeparator(), $this->getPath() );
+        $return = implode( $this->getSeparator(), $this->getPath() );
 
-        return $return;
+        return Util::normalizeUnixPath($return, $this->getSeparator());
     }
 
     /**
@@ -224,7 +228,16 @@ class PathJoinUri extends PathAbstractUri
     function append($pathUri)
     {
         /** @var iPathAbstractUri $pathUri */
-        $finalPath = array_merge($this->getPath(), $pathUri->getPath());
+        $appendPath = $pathUri->getPath();
+        $appendPath = array_filter($appendPath, function($p) {
+            // Remove all ['', ..] from path
+            // on appended path we don't want any absolute sign in
+            // array list
+            return $p !== '';
+        });
+
+        $finalPath = array_merge($this->getPath(), $appendPath);
+
         $this->setPath($finalPath);
 
         return $this;

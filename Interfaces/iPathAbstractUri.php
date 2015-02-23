@@ -16,6 +16,8 @@ interface iPathAbstractUri
      * Build Object From String
      *
      * - parse string to associateArray setter
+     * - return value of this method must can be
+     *   used as an argument for fromArray
      *
      * @param string $pathStr
      *
@@ -84,6 +86,8 @@ interface iPathAbstractUri
 
     /**
      * Get Assembled Path As String
+     *
+     * - the path must normalized before output
      *
      * @return string
      */
