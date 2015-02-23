@@ -223,6 +223,9 @@ class PathJoinUri extends PathAbstractUri
      */
     function append($pathUri)
     {
+        /** @var iPathAbstractUri $pathUri */
+        $finalPath = array_merge($this->getPath(), $pathUri->getPath());
+        $this->setPath($finalPath);
 
         return $this;
     }
@@ -236,7 +239,11 @@ class PathJoinUri extends PathAbstractUri
      */
     function prepend($pathUri)
     {
-        // TODO: Implement prepend() method.
+        /** @var iPathAbstractUri $pathUri */
+        $finalPath = array_merge($pathUri->getPath(), $this->getPath());
+        $this->setPath($finalPath);
+
+        return $this;
     }
 
     /**
