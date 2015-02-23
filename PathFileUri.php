@@ -164,6 +164,10 @@ class PathFileUri extends PathAbstractUri
     function toString()
     {
         $finalPath = clone $this->getFilepath();
+        if ($this->allowOverrideBase)
+            // Normalize Filepath before concat them
+            $finalPath->normalize();
+
         if ($this->getPathStrMode() === self::PATH_AS_ABSOLUTE)
             $finalPath = $finalPath->prepend($this->getBasepath());
 
