@@ -69,9 +69,24 @@ interface iPathJoinedUri extends iPathAbstractUri
      *
      * - manipulate current path
      *
-     * @param iPathAbstractUri $pathUri
+     * @param iPathJoinedUri $pathUri
      *
+     * @param bool $toggle
      * @return $this
      */
-    function mask($pathUri);
+    function mask($pathUri, $toggle = true);
+
+    /**
+     * Joint Given PathUri with Current Path
+     *
+     * /var/www/html <=> /var/www/ ===> /var/www
+     *
+     * - manipulate current path
+     *
+     * @param iPathJoinedUri $pathUri
+     *
+     * @param bool $toggle
+     * @return $this
+     */
+    function joint($pathUri, $toggle = true);
 }

@@ -16,7 +16,7 @@ class PathFileUri extends PathAbstractUri
     /**
      * @var iPathJoinedUri
      */
-    protected $filepath;
+    protected $path;
     protected $basename;
     protected $extension;
 
@@ -142,7 +142,7 @@ class PathFileUri extends PathAbstractUri
      *
      * return [
      *  'basepath'  => iPathJoinedUri,
-     *  'filepath'  => iPathJoinedUri,
+     *  'path'      => iPathJoinedUri,
      *  'basename'  => 'name_with', # without extension
      *  'extension' => 'ext',
      *  'filename'  => 'name_with.ext',
@@ -354,7 +354,7 @@ class PathFileUri extends PathAbstractUri
                 , is_object($pathUri) ? get_class($pathUri) : gettype($pathUri)
             ));
 
-        $this->filepath = $pathUri;
+        $this->path = $pathUri;
 
         return $this;
     }
@@ -369,12 +369,12 @@ class PathFileUri extends PathAbstractUri
      */
     function getPath()
     {
-        if (!$this->filepath)
-            $this->filepath = new PathJoinUri(['path' => '']);
+        if (!$this->path)
+            $this->path = new PathJoinUri(['path' => '']);
 
-        $this->filepath->setSeparator($this->getPathSeparator());
+        $this->path->setSeparator($this->getPathSeparator());
 
-        return $this->filepath;
+        return $this->path;
     }
 
     /**
