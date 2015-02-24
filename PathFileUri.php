@@ -107,13 +107,15 @@ class PathFileUri extends PathAbstractUri
             $ret['filename'] = $ret['basename'];
         }
 
-        if ($ret['path'] === '.' || $ret['path'] === '')
-            unset($ret['path']);
-        else
-            // build pathJoin object
-            $ret['path'] = $pathJoin->fromArray([
-                'path' => $ret['path']
-            ]);
+        if (isset($ret['path'])) {
+            if ($ret['path'] === '.' || $ret['path'] === '')
+                unset($ret['path']);
+            else
+                // build pathJoin object
+                $ret['path'] = $pathJoin->fromArray([
+                    'path' => $ret['path']
+                ]);
+        }
 
         return $ret;
     }
