@@ -159,11 +159,21 @@ class PathJoinUri extends PathAbstractUri
      */
     function toString()
     {
-        if (count($this->getPath()) > 1)
-            $return = implode( $this->getSeparator(), $this->getPath() );
-        else
-            // in case of ['']
-            $return = $this->getSeparator();
+        $path   = $this->getPath();
+
+        if (!$path)
+            return '';
+
+        if ($path == [''])
+            // its root, but normalized to '' by "//"
+            return $this->getSeparator();
+
+        // add empty slashes after all
+        // that implode work properly for
+        // paths with one member
+        // its removed by normalize at last
+        $path[] = '';
+        $return = implode( $this->getSeparator(), $this->getPath() );
 
         return Util::normalizeUnixPath($return, $this->getSeparator());
     }
@@ -285,22 +295,75 @@ class PathJoinUri extends PathAbstractUri
     /**
      * Mask Given PathUri with Current Path
      *
+     * toggle:
+     * /var/www/html <=> /var/www/     ===> /html
+     *
+     * toggle false:
+     * /var/www/     <=> /var/www/html ===> ''
+     *
+     * - manipulate current path
+     *
+     * @param iPathJoinedUri $pathUri
+     *
+     * @param bool $toggle
+     * @return $this
+     */
+    function mask($pathUri, $toggle = true)
+    {
+        $muchLength = $this->getPath();
+        $less       = $pathUri->getPath();
+
+        if ($toggle)
+            (count($pathUri->getPath()) >= count($this->getPath()))
+                ? ( $muchLength = $pathUri->getPath() and $less = $this->getPath() )
+                : ( $muchLength = $this->getPath()    and $less = $pathUri->getPath() )
+            ;
+
+        $masked = $muchLength;
+        foreach($muchLength as $i => $v) {
+            if (!isset($less[$i]) || $v != $less[$i])
+                break;
+
+            unset($masked[$i]);
+        }
+
+        $this->setPath($masked);
+
+        return $this;
+    }
+
+    /**
+     * Joint Given PathUri with Current Path
+     *
      * /var/www/html <=> /var/www/ ===> /html
      *
      * - manipulate current path
      *
-     * @param iPathAbstractUri $pathUri
+     * @param iPathJoinedUri $pathUri
      *
+     * @param bool $toggle
      * @return $this
      */
-    function mask($pathUri)
+    function joint($pathUri, $toggle = true)
     {
-         (count($pathUri->getPath()) >= count($this->getPath()))
-            ? ( $muchLength = $pathUri->getPath() and $less = $this->getPath() )
-            : ( $muchLength = $this->getPath()    and $less = $pathUri->getPath() )
-         ;
+        $muchLength = $this->getPath();
+        $less       = $pathUri->getPath();
 
-        print(array_intersect($muchLength, $less));
+        if ($toggle)
+             (count($pathUri->getPath()) >= count($this->getPath()))
+                ? ( $muchLength = $pathUri->getPath() and $less = $this->getPath() )
+                : ( $muchLength = $this->getPath()    and $less = $pathUri->getPath() )
+             ;
+
+        $similar = []; // empty path
+        foreach($muchLength as $i => $v) {
+            if (!array_key_exists($i, $less) || $v != $less[$i])
+                break;
+
+            $similar[] = $v;
+        }
+
+        $this->setPath($similar);
 
         return $this;
     }
