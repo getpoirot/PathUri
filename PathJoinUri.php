@@ -213,12 +213,18 @@ class PathJoinUri extends PathAbstractUri
         if (!$paths)
             return $this;
 
-        /*$paths = array_filter($paths, function($p) {
-            if (strpos($p, ':') !== false)
-                throw new \InvalidArgumentException('Invalid path character ":"');
+        reset($paths); $i = 0; $indexes = [];
+        while(($val = current($paths)) !== false) {
+            if (($val === '' || $val === '.') && $i > 0)
+                $indexes[] = key($paths);
 
-            return $p !== '' && $p !== '.';
-        });*/
+            $i++;
+            next($paths);
+        }
+
+        foreach($indexes as $i)
+            unset($paths[$i]);
+
 
         reset($paths); $prevIndex = null;
         while(in_array('..', $paths, true))
