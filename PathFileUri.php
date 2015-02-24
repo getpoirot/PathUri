@@ -154,7 +154,7 @@ class PathFileUri extends PathAbstractUri
     {
         return [
             'basepath'  => $this->getBasepath(),
-            'filepath'  => $this->getPath(),
+            'path'      => $this->getPath(),
             'basename'  => $this->getBasename(),
             'extension' => $this->getExtension(),
             'filename'  => $this->getFilename(),
@@ -174,12 +174,16 @@ class PathFileUri extends PathAbstractUri
 
         if (!$this->allowOverrideBase)
             // Normalize Filepath before concat them
+            // with normalize we have not ../ at begining of uri
+            // that append to base path and final normalize
+            // not override basepath so.
             $finalPath->normalize();
 
         if ($this->getPathStrMode() === self::PATH_AS_ABSOLUTE)
             $finalPath = $finalPath->prepend($this->getBasepath());
 
-        $finalPath = $finalPath->normalize()->toString();
+        $finalPath = $finalPath->normalize()
+            ->toString();
 
         // Also sequences slashes removed by normalize
         $realPathname = $this->normalizePathStr(
