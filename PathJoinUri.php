@@ -159,7 +159,11 @@ class PathJoinUri extends PathAbstractUri
      */
     function toString()
     {
-        $return = implode( $this->getSeparator(), $this->getPath() );
+        if (count($this->getPath()) > 1)
+            $return = implode( $this->getSeparator(), $this->getPath() );
+        else
+            // in case of ['']
+            $return = $this->getSeparator();
 
         return Util::normalizeUnixPath($return, $this->getSeparator());
     }
