@@ -39,15 +39,9 @@ class PathJoinUri extends PathAbstractUri
 
     protected $separator = '/';
 
-
-    // Used as a helper for fromArray setter ... {
-
-    protected function getPath()
-    {
-        return $this->path;
-    }
-
     /**
+     * Set Path
+     *
      * - Null Or Empty Array Means We Have No Path
      *
      * note: in case of string path using separator
@@ -57,7 +51,7 @@ class PathJoinUri extends PathAbstractUri
      *
      * @return $this
      */
-    protected function setPath($arrPath)
+    function setPath($arrPath)
     {
         if (is_string($arrPath))
             $arrPath = $this->parse($arrPath)['path'];
@@ -77,7 +71,15 @@ class PathJoinUri extends PathAbstractUri
         return $this;
     }
 
-    // ... }
+    /**
+     * Get Path
+     *
+     * @return array
+     */
+    function getPath()
+    {
+        return $this->path;
+    }
 
     /**
      * Build Object From String
@@ -104,10 +106,15 @@ class PathJoinUri extends PathAbstractUri
         if ($pathStr === $this->getSeparator())
             // in case of "/", explode create unwanted ['', '']
             $path = [''];
+        elseif ($pathStr === '')
+            $path = [];
         else
             $path = explode($this->getSeparator(), $pathStr);
 
-        return ['path' => $path];
+        return [
+            'path'      => $path,
+            'separator' => $this->getSeparator(),
+        ];
     }
 
     /**

@@ -128,7 +128,7 @@ class PathFileUri extends PathAbstractUri
         if ($this->getPathStrMode() == self::PATH_AS_ABSOLUTE)
             return true;
 
-        $filePath = clone $this->getFilepath();
+        $filePath = clone $this->getPath();
         $path = $filePath->normalize()
             ->toArray()['path'];
 
@@ -152,7 +152,7 @@ class PathFileUri extends PathAbstractUri
     {
         return [
             'basepath'  => $this->getBasepath(),
-            'filepath'  => $this->getFilepath(),
+            'filepath'  => $this->getPath(),
             'basename'  => $this->getBasename(),
             'extension' => $this->getExtension(),
             'filename'  => $this->getFilename(),
@@ -168,18 +168,20 @@ class PathFileUri extends PathAbstractUri
      */
     function toString()
     {
-        $finalPath = clone $this->getFilepath();
-        if ($this->allowOverrideBase)
+        $finalPath = clone $this->getPath();
+
+        if (!$this->allowOverrideBase)
             // Normalize Filepath before concat them
             $finalPath->normalize();
 
         if ($this->getPathStrMode() === self::PATH_AS_ABSOLUTE)
             $finalPath = $finalPath->prepend($this->getBasepath());
 
+        $finalPath = $finalPath->normalize()->toString();
+
         // Also sequences slashes removed by normalize
         $realPathname = $this->normalizePathStr(
-            $finalPath->normalize()->toString()
-            .$this->getPathSeparator()
+            ( ($finalPath) ? ($finalPath.$this->getPathSeparator()) : '' )
             .$this->getFilename()
         );
 
@@ -331,7 +333,7 @@ class PathFileUri extends PathAbstractUri
      *
      * @return $this
      */
-    function setFilepath($pathUri)
+    function setPath($pathUri)
     {
         if (is_string($pathUri))
             $pathUri = new PathJoinUri([
@@ -359,7 +361,7 @@ class PathFileUri extends PathAbstractUri
      *
      * @return iPathJoinedUri
      */
-    function getFilepath()
+    function getPath()
     {
         if (!$this->filepath)
             $this->filepath = new PathJoinUri(['path' => '']);
@@ -444,7 +446,7 @@ class PathFileUri extends PathAbstractUri
      */
     protected function normalizePathStr($path, $stripTrailingSlash = true)
     {
-        $separator = $this->getFilepath()->getSeparator();
+        $separator = $this->getPath()->getSeparator();
 
         // convert paths to portables one
         $path = Util::normalizeUnixPath(

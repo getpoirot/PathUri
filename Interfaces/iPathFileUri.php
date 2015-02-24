@@ -124,7 +124,7 @@ interface iPathFileUri extends iPathAbstractUri
      *
      * @return $this
      */
-    function setFilepath($pathUri);
+    function setPath($pathUri);
 
     /**
      * Gets the path without filename
@@ -134,7 +134,7 @@ interface iPathFileUri extends iPathAbstractUri
      *
      * @return iPathJoinedUri
      */
-    function getFilepath();
+    function getPath();
 
     // Helpers:
 
