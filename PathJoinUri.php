@@ -304,8 +304,9 @@ class PathJoinUri extends PathAbstractUri
      * - manipulate current path
      *
      * @param iPathJoinedUri $pathUri
+     * @param bool           $toggle  with toggle always bigger path
+     *                                compared to little one
      *
-     * @param bool $toggle
      * @return $this
      */
     function mask($pathUri, $toggle = true)

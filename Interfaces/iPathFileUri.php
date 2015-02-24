@@ -19,14 +19,14 @@ interface iPathFileUri extends iPathAbstractUri
      *
      * @return $this
      */
-    function setPathSeparator($sep);
+    function setSeparator($sep);
 
     /**
      * Get Path Separator
      *
      * @return string
      */
-    function getPathSeparator();
+    function getSeparator();
 
     /**
      * Set Base Path

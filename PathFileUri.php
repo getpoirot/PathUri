@@ -39,7 +39,7 @@ class PathFileUri extends PathAbstractUri
      *
      * @return $this
      */
-    function setPathSeparator($sep)
+    function setSeparator($sep)
     {
         $this->pathSep = (string) $sep;
 
@@ -51,7 +51,7 @@ class PathFileUri extends PathAbstractUri
      *
      * @return string
      */
-    function getPathSeparator()
+    function getSeparator()
     {
         return $this->pathSep;
     }
@@ -82,7 +82,7 @@ class PathFileUri extends PathAbstractUri
         // check the given path has file info .. {
         $pathJoin = new PathJoinUri([
             'path'      => $path,
-            'separator' => $this->getPathSeparator(),
+            'separator' => $this->getSeparator(),
         ]);
 
         $tmpPath = $pathJoin->toArray()['path'];
@@ -187,7 +187,7 @@ class PathFileUri extends PathAbstractUri
 
         // Also sequences slashes removed by normalize
         $realPathname = $this->normalizePathStr(
-            ( ($finalPath) ? ($finalPath.$this->getPathSeparator()) : '' )
+            ( ($finalPath) ? ($finalPath.$this->getSeparator()) : '' )
             .$this->getFilename()
         );
 
@@ -212,10 +212,10 @@ class PathFileUri extends PathAbstractUri
         if (is_string($pathUri))
             $pathUri = new PathJoinUri([
                 'path'      => Util::normalizeUnixPath($pathUri),
-                'separator' => $this->getPathSeparator(),
+                'separator' => $this->getSeparator(),
             ]);
         elseif ($pathUri instanceof iPathJoinedUri)
-            $pathUri->setSeparator($this->getPathSeparator());
+            $pathUri->setSeparator($this->getSeparator());
         else
             throw new \InvalidArgumentException(sprintf(
                 'PathUti must be string or instanceof iPathJoinedUri, given: %s'
@@ -242,7 +242,7 @@ class PathFileUri extends PathAbstractUri
         if (!$this->basepath)
             $this->basepath = new PathJoinUri(['path' => '']);
 
-        $this->basepath->setSeparator($this->getPathSeparator());
+        $this->basepath->setSeparator($this->getSeparator());
 
         return $this->basepath;
     }
@@ -344,10 +344,10 @@ class PathFileUri extends PathAbstractUri
         if (is_string($pathUri))
             $pathUri = new PathJoinUri([
                 'path'      => Util::normalizeUnixPath($pathUri),
-                'separator' => $this->getPathSeparator(),
+                'separator' => $this->getSeparator(),
             ]);
         elseif ($pathUri instanceof iPathJoinedUri)
-            $pathUri->setSeparator($this->getPathSeparator());
+            $pathUri->setSeparator($this->getSeparator());
         else
             throw new \InvalidArgumentException(sprintf(
                 'PathUti must be string or instanceof iPathJoinedUri, given: %s'
@@ -372,7 +372,7 @@ class PathFileUri extends PathAbstractUri
         if (!$this->path)
             $this->path = new PathJoinUri(['path' => '']);
 
-        $this->path->setSeparator($this->getPathSeparator());
+        $this->path->setSeparator($this->getSeparator());
 
         return $this->path;
     }
