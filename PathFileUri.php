@@ -76,6 +76,7 @@ class PathFileUri extends PathAbstractUri
                 , is_object($pathStr) ? get_class($pathStr) : gettype($pathStr)
             ));
 
+
         $path = $this->normalizePathStr($pathStr);
 
         // check the given path has file info .. {

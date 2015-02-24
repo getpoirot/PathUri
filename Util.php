@@ -22,7 +22,7 @@ class Util
         // remove sequences of slashes
         $path = preg_replace('#'.$separator.'{2,}#', $separator, $path);
 
-        //remove trailing slash
+        //remove trailing slash, /dir[/] not /
         if ($stripTrailingSlash
             && strlen($path) > 1
             && substr($path, -1, 1) === $separator

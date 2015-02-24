@@ -99,9 +99,15 @@ class PathJoinUri extends PathAbstractUri
                 , is_object($pathStr) ? get_class($pathStr) : gettype($pathStr)
             ));
 
+        // remove last trailing "/"
         $pathStr = Util::normalizeUnixPath($pathStr, $this->getSeparator());
+        if ($pathStr === $this->getSeparator())
+            // in case of "/", explode create unwanted ['', '']
+            $path = [''];
+        else
+            $path = explode($this->getSeparator(), $pathStr);
 
-        return [ 'path' => explode($this->getSeparator(), $pathStr) ];
+        return ['path' => $path];
     }
 
     /**
