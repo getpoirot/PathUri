@@ -32,6 +32,8 @@ class PathFileUri extends PathAbstractUri
 
     protected $allowOverrideBase = true;
 
+    protected $normalize = false;
+
     /**
      * Set Path Separator
      *
@@ -172,7 +174,7 @@ class PathFileUri extends PathAbstractUri
     {
         $finalPath = clone $this->getPath();
 
-        if (!$this->allowOverrideBase)
+        if (!$this->allowOverrideBase && $this->normalize)
             // Normalize Filepath before concat them
             // with normalize we have not ../ at begining of uri
             // that append to base path and final normalize
@@ -182,8 +184,10 @@ class PathFileUri extends PathAbstractUri
         if ($this->getPathStrMode() === self::PATH_AS_ABSOLUTE)
             $finalPath = $finalPath->prepend($this->getBasepath());
 
-        $finalPath = $finalPath->normalize()
-            ->toString();
+        if ($this->normalize)
+            $finalPath->normalize();
+
+        $finalPath = $finalPath->toString();
 
         // Also sequences slashes removed by normalize
         $realPathname = $this->normalizePathStr(
@@ -351,7 +355,9 @@ class PathFileUri extends PathAbstractUri
         else
             throw new \InvalidArgumentException(sprintf(
                 'PathUti must be string or instanceof iPathJoinedUri, given: %s'
-                , is_object($pathUri) ? get_class($pathUri) : gettype($pathUri)
+                , is_object($pathUri)
+                    ? get_class($pathUri)
+                    : var_export($pathUri, true)
             ));
 
         $this->path = $pathUri;
@@ -402,7 +408,7 @@ class PathFileUri extends PathAbstractUri
      */
     function normalize()
     {
-        // TODO: Implement normalize() method.
+        $this->normalize = true;
 
         return $this;
     }
