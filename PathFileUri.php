@@ -201,22 +201,29 @@ class PathFileUri extends PathAbstractUri
     /**
      * Set Base Path
      *
+     * - implement null for reset
+     *
      * - with setting basepath value
      *   the path mode changed to AS_ABSOLUTE
      *   and it can be changed by setPathStrMode
      *   later
      *
-     * @param iPathJoinedUri|string $pathUri
+     * @param iPathJoinedUri|string|null $pathUri
      *
      * @throws \InvalidArgumentException
      * @return $this
      */
     function setBasepath($pathUri)
     {
-        if (is_string($pathUri))
+        if ($pathUri == null)
+            $pathUri = [];
+        elseif(is_string($pathUri))
+            $pathUri = Util::normalizeUnixPath($pathUri);
+
+        if (is_array($pathUri) || is_string($pathUri))
             $pathUri = new PathJoinUri([
-                'path'      => Util::normalizeUnixPath($pathUri),
-                'separator' => $this->getSeparator(),
+                'path'      => $pathUri,
+                'separator' => $this->getSeparator()
             ]);
         elseif ($pathUri instanceof iPathJoinedUri)
             $pathUri->setSeparator($this->getSeparator());
@@ -345,10 +352,15 @@ class PathFileUri extends PathAbstractUri
      */
     function setPath($pathUri)
     {
-        if (is_string($pathUri))
+        if ($pathUri == null)
+            $pathUri = [];
+        elseif(is_string($pathUri))
+            $pathUri = Util::normalizeUnixPath($pathUri);
+
+        if (is_array($pathUri) || is_string($pathUri))
             $pathUri = new PathJoinUri([
-                'path'      => Util::normalizeUnixPath($pathUri),
-                'separator' => $this->getSeparator(),
+                'path'      => $pathUri,
+                'separator' => $this->getSeparator()
             ]);
         elseif ($pathUri instanceof iPathJoinedUri)
             $pathUri->setSeparator($this->getSeparator());

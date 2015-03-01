@@ -31,12 +31,14 @@ interface iPathFileUri extends iPathAbstractUri
     /**
      * Set Base Path
      *
+     * - implement null for reset
+     *
      * - with setting basepath value
      *   the path mode changed to AS_ABSOLUTE
      *   and it can be changed by setPathStrMode
      *   later
      *
-     * @param iPathJoinedUri|string $pathUri
+     * @param iPathJoinedUri|string|null $pathUri
      *
      * @throws \InvalidArgumentException
      * @return $this
