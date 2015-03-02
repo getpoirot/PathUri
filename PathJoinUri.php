@@ -213,6 +213,7 @@ class PathJoinUri extends PathAbstractUri
         if (!$paths)
             return $this;
 
+        // Cleanup empty directories ".", "//":
         reset($paths); $i = 0; $indexes = [];
         while(($val = current($paths)) !== false) {
             if (($val === '' || $val === '.') && $i > 0)
@@ -226,14 +227,19 @@ class PathJoinUri extends PathAbstractUri
             unset($paths[$i]);
 
 
+        // Normalize go up to parent "..":
         reset($paths); $prevIndex = null;
         while(in_array('..', $paths, true))
         {
             $currIndex = key($paths);
             $currItem  = current($paths);
 
-            if ($currItem == '..') {
-                if ($prevIndex !== null) {
+            if ($currItem == '..')
+            {
+                if ($prevIndex !== null
+                    // we don't want to go back further than home
+                    && $paths[$prevIndex] !== ''
+                ) {
                     unset($paths[$prevIndex]);
                 }
 
