@@ -136,7 +136,7 @@ class PathFileUri extends PathAbstractUri
         $path = $filePath->normalize()
             ->toArray()['path'];
 
-        return ($path[0] == '');
+        return (isset($path[0]) && $path[0] == iPathJoinedUri::ABSOLUTE_HOME);
     }
 
     /**
