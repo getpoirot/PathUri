@@ -4,6 +4,11 @@ namespace Poirot\PathUri\Interfaces;
 interface iPathJoinedUri extends iPathAbstractUri
 {
     /**
+     * ['/', ...] it means absolute from home
+     */
+    const ABSOLUTE_HOME = '/';
+
+    /**
      * Set Path
      *
      * - Null Or Empty Array Means We Have No Path

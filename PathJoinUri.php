@@ -105,11 +105,18 @@ class PathJoinUri extends PathAbstractUri
         $pathStr = Util::normalizeUnixPath($pathStr, $this->getSeparator());
         if ($pathStr === $this->getSeparator())
             // in case of "/", explode create unwanted ['', '']
-            $path = [''];
+            // so i`ve check path string for decision
+            $path = [ self::ABSOLUTE_HOME, ];
         elseif ($pathStr === '')
+            // Current Directory
             $path = [];
-        else
-            $path = explode($this->getSeparator(), $pathStr);
+        else {
+            $path = $this->__normalize(explode($this->getSeparator(), $pathStr));
+            if (isset($path[0]) && $path[0] == '')
+                // explode affect on absolute addresses
+                // start with separator. exp. "/var/www/"
+                $path[0] = self::ABSOLUTE_HOME;
+        }
 
         return [
             'path'      => $path,
@@ -129,7 +136,7 @@ class PathJoinUri extends PathAbstractUri
         reset($p);
         $fi = current($p);
 
-        return $fi === '' || substr($fi, -1) === ':';
+        return $fi === self::ABSOLUTE_HOME || substr($fi, -1) === ':';
     }
 
     /**
@@ -160,12 +167,11 @@ class PathJoinUri extends PathAbstractUri
     function toString()
     {
         $path   = $this->getPath();
-
-        if (!$path)
+        if ($path == [])
             return '';
 
-        if ($path == [''])
-            // its root, but normalized to '' by "//"
+        if ($path == [self::ABSOLUTE_HOME])
+            // its home, implode not working for on element
             return $this->getSeparator();
 
         // add empty slashes after all
@@ -209,14 +215,28 @@ class PathJoinUri extends PathAbstractUri
      */
     function normalize()
     {
-        $paths = $this->getPath();
-        if (!$paths)
-            return $this;
+        $paths = $this->__normalize($this->getPath());
+        $this->setPath($paths);
+
+        return $this;
+    }
+
+    /**
+     * Normalize Array Path
+     *
+     * @param array $paths
+     *
+     * @return array
+     */
+    protected function __normalize(array $paths)
+    {
+        if ($paths == [])
+            return $paths;
 
         // Cleanup empty directories ".", "//":
         reset($paths); $i = 0; $indexes = [];
         while(($val = current($paths)) !== false) {
-            if (($val === '' || $val === '.') && $i > 0)
+            if (($val == self::ABSOLUTE_HOME || $val === '' || $val === '.') && $i > 0)
                 $indexes[] = key($paths);
 
             $i++;
@@ -254,9 +274,7 @@ class PathJoinUri extends PathAbstractUri
             next($paths);
         }
 
-        $this->setPath($paths);
-
-        return $this;
+        return $paths;
     }
 
     /**
@@ -273,10 +291,10 @@ class PathJoinUri extends PathAbstractUri
         /** @var iPathAbstractUri $pathUri */
         $appendPath = $pathUri->getPath();
         $appendPath = array_filter($appendPath, function($p) {
-            // Remove all ['', ..] from path
+            // Remove all ['',] from path
             // on appended path we don't want any absolute sign in
             // array list
-            return $p !== '';
+            return $p !== self::ABSOLUTE_HOME;
         });
 
         $finalPath = array_merge($this->getPath(), $appendPath);
@@ -381,4 +399,3 @@ class PathJoinUri extends PathAbstractUri
         return $this;
     }
 }
- 
