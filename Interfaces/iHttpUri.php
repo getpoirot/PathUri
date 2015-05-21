@@ -24,7 +24,7 @@ interface iHttpUri extends iSeqPathUri
      * - the trailing ":" character is not part of the scheme and MUST NOT be
      *   added.
      *
-     * @return string|false
+     * @return string|null
      */
     function getScheme();
 
@@ -45,7 +45,7 @@ interface iHttpUri extends iSeqPathUri
      * The info syntax of the URI is:
      * [user-info@]host
      *
-     * @return string|false The URI user information, in "username[:password]" format
+     * @return string|null The URI user information, in "username[:password]" format
      */
     function getUserInfo();
 
@@ -75,7 +75,7 @@ interface iHttpUri extends iSeqPathUri
      *
      * - The value returned MUST be normalized to lowercase
      *
-     * @return string|false
+     * @return string|null
      */
     function getHost();
 
@@ -101,7 +101,7 @@ interface iHttpUri extends iSeqPathUri
      * - If no port is present, but a scheme is present, this method MAY return
      * the standard port for that scheme, but SHOULD return null
      *
-     * @return int|false
+     * @return int|null
      */
     function getPort();
 
@@ -163,7 +163,7 @@ interface iHttpUri extends iSeqPathUri
     /**
      * Get the URI fragment
      *
-     * @return string|false
+     * @return string|null
      */
     function getFragment();
 }

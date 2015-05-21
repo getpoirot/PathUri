@@ -3,11 +3,19 @@ namespace Poirot\PathUri;
 
 use Poirot\Core\Interfaces\iPoirotEntity;
 use Poirot\PathUri\Interfaces\iHttpUri;
-use Poirot\PathUri\Interfaces\iSeqPathUri;
 
 class HttpUri extends SeqPathJoinUri
     implements iHttpUri
 {
+    /*
+        URI parts:
+    */
+    protected $scheme;
+    protected $userInfo;
+    protected $host;
+    protected $port;
+    protected $fragment;
+
     /**
      * Build Object From String
      *
@@ -52,7 +60,9 @@ class HttpUri extends SeqPathJoinUri
      */
     function setScheme($scheme)
     {
-        // TODO: Implement setScheme() method.
+        $this->scheme = $scheme;
+
+        return $this;
     }
 
     /**
@@ -66,7 +76,7 @@ class HttpUri extends SeqPathJoinUri
      */
     function getScheme()
     {
-        // TODO: Implement getScheme() method.
+        return $this->scheme;
     }
 
     /**
@@ -79,7 +89,9 @@ class HttpUri extends SeqPathJoinUri
      */
     function setUserInfo($userInfo)
     {
-        // TODO: Implement setUserInfo() method.
+        $this->userInfo = $userInfo;
+
+        return $this;
     }
 
     /**
@@ -93,7 +105,7 @@ class HttpUri extends SeqPathJoinUri
      */
     function getUserInfo()
     {
-        // TODO: Implement getUserInfo() method.
+        return $this->userInfo;
     }
 
     /**
@@ -117,7 +129,9 @@ class HttpUri extends SeqPathJoinUri
      */
     function setHost($host)
     {
-        // TODO: Implement setHost() method.
+        $this->host = $host;
+
+        return $this;
     }
 
     /**
@@ -129,7 +143,7 @@ class HttpUri extends SeqPathJoinUri
      */
     function getHost()
     {
-        // TODO: Implement getHost() method.
+        return $this->host;
     }
 
     /**
@@ -141,7 +155,9 @@ class HttpUri extends SeqPathJoinUri
      */
     function setPort($port)
     {
-        // TODO: Implement setPort() method.
+        $this->port = $port;
+
+        return $this;
     }
 
     /**
@@ -161,7 +177,7 @@ class HttpUri extends SeqPathJoinUri
      */
     function getPort()
     {
-        // TODO: Implement getPort() method.
+        return $this->port;
     }
 
     /**
@@ -198,7 +214,9 @@ class HttpUri extends SeqPathJoinUri
      */
     function setFragment($fragment)
     {
-        // TODO: Implement setFragment() method.
+        $this->fragment = $fragment;
+
+        return $this;
     }
 
     /**
@@ -208,6 +226,6 @@ class HttpUri extends SeqPathJoinUri
      */
     function getFragment()
     {
-        // TODO: Implement getFragment() method.
+        return $this->fragment;
     }
 }

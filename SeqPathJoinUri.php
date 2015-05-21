@@ -46,6 +46,8 @@ class SeqPathJoinUri extends AbstractPathUri
      * - return value of this method must can be
      *   used as an argument for fromArray
      *
+     * // TODO implement rfc 7230 Section 2.7.3 for empty paths and "/"
+     *
      * @param string $pathStr
      *
      * @throws \InvalidArgumentException
@@ -96,7 +98,7 @@ class SeqPathJoinUri extends AbstractPathUri
     function setPath($path)
     {
         if (is_string($path))
-            $path = $this->parse($path)['path'];
+            $path = (new self)->parse($path)['path'];
 
         if ($path === null)
             $path = [];
