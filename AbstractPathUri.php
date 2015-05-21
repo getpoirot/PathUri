@@ -4,7 +4,7 @@ namespace Poirot\PathUri;
 use Poirot\Core\BuilderSetterTrait;
 use Poirot\PathUri\Interfaces\iPathUri;
 
-abstract class PathUri
+abstract class AbstractPathUri
     implements iPathUri
 {
     use BuilderSetterTrait {

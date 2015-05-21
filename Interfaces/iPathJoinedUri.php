@@ -1,34 +1,8 @@
 <?php
 namespace Poirot\PathUri\Interfaces;
 
-interface iPathJoinedUri extends iPathAbstractUri
+interface iPathJoinedUri extends iPathUri
 {
-    /**
-     * ['/', ...] it means absolute from home
-     */
-    const ABSOLUTE_HOME = '/';
-
-    /**
-     * Set Path
-     *
-     * - Null Or Empty Array Means We Have No Path
-     *
-     * note: in case of string path using separator
-     *       to explode and build an array
-     *
-     * @param array|string|null $arrPath
-     *
-     * @return $this
-     */
-    function setPath($arrPath);
-
-    /**
-     * Get Path
-     *
-     * @return array
-     */
-    function getPath();
-
     /**
      * Set Path Separator
      *
@@ -50,7 +24,7 @@ interface iPathJoinedUri extends iPathAbstractUri
      *
      * - manipulate current path
      *
-     * @param iPathAbstractUri $pathUri
+     * @param iPathUri $pathUri
      *
      * @return $this
      */
@@ -61,7 +35,7 @@ interface iPathJoinedUri extends iPathAbstractUri
      *
      * - manipulate current path
      *
-     * @param iPathAbstractUri $pathUri
+     * @param iPathUri $pathUri
      *
      * @return $this
      */
@@ -74,7 +48,7 @@ interface iPathJoinedUri extends iPathAbstractUri
      * /var/www/html <=> /var/www/     ===> /html
      *
      * toggle false:
-     * /var/www/     <=> /var/www/html ===> ''
+     * /var/www/     <=> var/www/html ===> ''
      *
      * - manipulate current path
      *

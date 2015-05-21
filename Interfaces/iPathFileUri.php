@@ -7,7 +7,7 @@ namespace Poirot\PathUri\Interfaces;
  * of this class
  *
  */
-interface iPathFileUri extends iPathAbstractUri
+interface iPathFileUri extends iPathUri
 {
     const PATH_AS_ABSOLUTE = 'display.absolute.include.basepath';
     const PATH_AS_RELATIVE = 'display.relative.without.basepath';
