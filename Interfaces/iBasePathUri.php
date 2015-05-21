@@ -19,6 +19,11 @@ interface iBasePathUri
      *   this array must can be used as an argument
      *   for fromArray method
      *
+     * - don't make conversion on values,
+     *   just separate uri parts as is.
+     *   query_params : x=y&z=4
+     *   ! make any conversion on setter methods
+     *
      * @param string $pathStr
      *
      * @throws \InvalidArgumentException
