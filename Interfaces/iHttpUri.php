@@ -3,7 +3,7 @@ namespace Poirot\PathUri\Interfaces;
 
 use Poirot\Core\Interfaces\iPoirotEntity;
 
-interface iHttpUri extends iSeqPathUri
+interface iHttpUri extends iBasePathUri
 {
     // Parse Getter/Setter Methods:
 
