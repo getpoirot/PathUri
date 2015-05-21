@@ -1,20 +1,20 @@
 <?php
 namespace Poirot\PathUri;
 
-use Poirot\PathUri\Interfaces\iPathFileUri;
-use Poirot\PathUri\Interfaces\iPathJoinedUri;
+use Poirot\PathUri\Interfaces\iFileBasePathUri;
+use Poirot\PathUri\Interfaces\iSeqBasePathUri;
 
-class PathFileUri extends PathUri
-    implements iPathFileUri
+class FilePathUri extends PathUri
+    implements iFileBasePathUri
 {
     protected $pathSep = '/';
 
     /**
-     * @var iPathJoinedUri
+     * @var iSeqBasePathUri
      */
     protected $basepath;
     /**
-     * @var iPathJoinedUri
+     * @var iSeqBasePathUri
      */
     protected $path;
     protected $basename;
@@ -82,7 +82,7 @@ class PathFileUri extends PathUri
         $path = $this->normalizePathStr($pathStr);
 
         // check the given path has file info .. {
-        $pathJoin = new PathJoinUri([
+        $pathJoin = new SeqPathJoinUri([
             'path'      => $path,
             'separator' => $this->getSeparator(),
         ]);
@@ -136,7 +136,7 @@ class PathFileUri extends PathUri
         $path = $filePath->normalize()
             ->toArray()['path'];
 
-        return (isset($path[0]) && $path[0] == iPathJoinedUri::ABSOLUTE_HOME);
+        return (isset($path[0]) && $path[0] == iSeqBasePathUri::ABSOLUTE_HOME);
     }
 
     /**
@@ -208,7 +208,7 @@ class PathFileUri extends PathUri
      *   and it can be changed by setPathStrMode
      *   later
      *
-     * @param iPathJoinedUri|string|null $pathUri
+     * @param iSeqBasePathUri|string|null $pathUri
      *
      * @throws \InvalidArgumentException
      * @return $this
@@ -221,11 +221,11 @@ class PathFileUri extends PathUri
             $pathUri = Util::normalizeUnixPath($pathUri);
 
         if (is_array($pathUri) || is_string($pathUri))
-            $pathUri = new PathJoinUri([
+            $pathUri = new SeqPathJoinUri([
                 'path'      => $pathUri,
                 'separator' => $this->getSeparator()
             ]);
-        elseif ($pathUri instanceof iPathJoinedUri)
+        elseif ($pathUri instanceof iSeqBasePathUri)
             $pathUri->setSeparator($this->getSeparator());
         else
             throw new \InvalidArgumentException(sprintf(
@@ -246,12 +246,12 @@ class PathFileUri extends PathUri
      * - override path separator from this class
      * - create new empty path instance if not set
      *
-     * @return iPathJoinedUri
+     * @return iSeqBasePathUri
      */
     function getBasepath()
     {
         if (!$this->basepath)
-            $this->basepath = new PathJoinUri(['path' => '']);
+            $this->basepath = new SeqPathJoinUri(['path' => '']);
 
         $this->basepath->setSeparator($this->getSeparator());
 
@@ -346,7 +346,7 @@ class PathFileUri extends PathUri
     /**
      * Set Path To File/Directory
      *
-     * @param iPathJoinedUri|string $pathUri
+     * @param iSeqBasePathUri|string $pathUri
      *
      * @return $this
      */
@@ -358,11 +358,11 @@ class PathFileUri extends PathUri
             $pathUri = Util::normalizeUnixPath($pathUri);
 
         if (is_array($pathUri) || is_string($pathUri))
-            $pathUri = new PathJoinUri([
+            $pathUri = new SeqPathJoinUri([
                 'path'      => $pathUri,
                 'separator' => $this->getSeparator()
             ]);
-        elseif ($pathUri instanceof iPathJoinedUri)
+        elseif ($pathUri instanceof iSeqBasePathUri)
             $pathUri->setSeparator($this->getSeparator());
         else
             throw new \InvalidArgumentException(sprintf(
@@ -383,12 +383,12 @@ class PathFileUri extends PathUri
      * - override path separator from this class
      * - create new empty path instance if not set
      *
-     * @return iPathJoinedUri
+     * @return iSeqBasePathUri
      */
     function getPath()
     {
         if (!$this->path)
-            $this->path = new PathJoinUri(['path' => '']);
+            $this->path = new SeqPathJoinUri(['path' => '']);
 
         $this->path->setSeparator($this->getSeparator());
 
@@ -451,7 +451,7 @@ class PathFileUri extends PathUri
      *
      * - used by toString method
      *
-     * @return self::PATH_AS_RELATIVE | self::PATH_AS_ABSOLUTE
+     * @return FilePathUri::PATH_AS_RELATIVE | self::PATH_AS_ABSOLUTE
      */
     function getPathStrMode()
     {

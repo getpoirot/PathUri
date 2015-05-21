@@ -1,8 +1,18 @@
 <?php
 namespace Poirot\PathUri\Interfaces;
 
-interface iPathJoinedUri extends iPathUri
+/**
+ * This interface used for sequencing paths with separator
+ *
+ * we have paths in form of arrays and separated with the separator
+ * /var/www/html, http://yoursite.com/path/to/ser, send:/again/path/
+ *
+ */
+interface iSeqPathUri extends iBasePathUri
 {
+
+    // Parse Getter/Setter Methods:
+
     /**
      * Set Path Separator
      *
@@ -19,12 +29,15 @@ interface iPathJoinedUri extends iPathUri
      */
     function getSeparator();
 
+
+    // Operation Methods:
+
     /**
      * Append Path
      *
      * - manipulate current path
      *
-     * @param iPathUri $pathUri
+     * @param iBasePathUri $pathUri
      *
      * @return $this
      */
@@ -35,7 +48,7 @@ interface iPathJoinedUri extends iPathUri
      *
      * - manipulate current path
      *
-     * @param iPathUri $pathUri
+     * @param iBasePathUri $pathUri
      *
      * @return $this
      */
@@ -48,11 +61,11 @@ interface iPathJoinedUri extends iPathUri
      * /var/www/html <=> /var/www/     ===> /html
      *
      * toggle false:
-     * /var/www/     <=> var/www/html ===> ''
+     * /var/www/     <=> /var/www/html ===> ''
      *
      * - manipulate current path
      *
-     * @param iPathJoinedUri $pathUri
+     * @param iSeqPathUri $pathUri
      * @param bool           $toggle  with toggle always bigger path
      *                                compared to little one
      *
@@ -67,7 +80,7 @@ interface iPathJoinedUri extends iPathUri
      *
      * - manipulate current path
      *
-     * @param iPathJoinedUri $pathUri
+     * @param iSeqPathUri $pathUri
      *
      * @param bool $toggle
      * @return $this

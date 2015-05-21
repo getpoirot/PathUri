@@ -7,7 +7,7 @@ namespace Poirot\PathUri\Interfaces;
  * of this class
  *
  */
-interface iPathFileUri extends iPathUri
+interface iFileBasePathUri extends iBasePathUri
 {
     const PATH_AS_ABSOLUTE = 'display.absolute.include.basepath';
     const PATH_AS_RELATIVE = 'display.relative.without.basepath';
@@ -38,7 +38,7 @@ interface iPathFileUri extends iPathUri
      *   and it can be changed by setPathStrMode
      *   later
      *
-     * @param iPathJoinedUri|string|null $pathUri
+     * @param iSeqPathUri|string|null $pathUri
      *
      * @throws \InvalidArgumentException
      * @return $this
@@ -51,7 +51,7 @@ interface iPathFileUri extends iPathUri
      * - override path separator from this class
      * - create new empty path instance if not set
      *
-     * @return iPathJoinedUri
+     * @return iSeqPathUri
      */
     function getBasepath();
 
@@ -122,7 +122,7 @@ interface iPathFileUri extends iPathUri
     /**
      * Set Path To File/Directory
      *
-     * @param iPathJoinedUri|string $pathUri
+     * @param iSeqPathUri|string $pathUri
      *
      * @return $this
      */
@@ -134,7 +134,7 @@ interface iPathFileUri extends iPathUri
      * - override path separator from this class
      * - create new empty path instance if not set
      *
-     * @return iPathJoinedUri
+     * @return iSeqPathUri
      */
     function getPath();
 

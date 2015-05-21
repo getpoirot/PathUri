@@ -1,16 +1,34 @@
 <?php
 namespace Poirot\PathUri\Interfaces;
 
-interface iPathUri
+interface iBasePathUri
 {
     /**
      * Create a new URI object
      *
-     * @param  iPathUri|string|array $pathUri
+     * @param  iBasePathUri|string|array $pathUri
      *
      * @throws \InvalidArgumentException
      */
     public function __construct($pathUri = null);
+
+    /**
+     * Set Uri Path
+     *
+     * ! null is to reset object and mean no path
+     *
+     * @param null|string|array $path
+     *
+     * @return $this
+     */
+    function setUri($path);
+
+    /**
+     * Get Uri Path
+     *
+     * @return array
+     */
+    function getUri();
 
     /**
      * Parse The String Uri To It's Structure
@@ -42,7 +60,7 @@ interface iPathUri
      * note: always the pathUri instance on given argument must
      *       be same as $this object
      *
-     * @param iPathUri $path
+     * @param iBasePathUri $path
      *
      * @throws \InvalidArgumentException
      * @return $this
@@ -51,6 +69,8 @@ interface iPathUri
 
     /**
      * Is Absolute Path?
+     *
+     * - in most cases substr[0]-1 == ":" mean we have on absolute path
      *
      * @return boolean
      */
@@ -108,7 +128,8 @@ interface iPathUri
     /**
      * Get Assembled Path As String
      *
-     * - the path must normalized before output
+     * - don`t call normalize path inside this method
+     *   normalizing does happen by case
      *
      * @return string
      */
