@@ -1,12 +1,12 @@
 <?php
 namespace Poirot\PathUri\Interfaces;
 
-interface iPathAbstractUri
+interface iPathUri
 {
     /**
      * Create a new URI object
      *
-     * @param  iPathAbstractUri|string|array $pathUri
+     * @param  iPathUri|string|array $pathUri
      *
      * @throws \InvalidArgumentException
      */
@@ -42,7 +42,7 @@ interface iPathAbstractUri
      * note: it take a instance of pathUri object
      *   same as base object
      *
-     * @param iPathAbstractUri $path
+     * @param iPathUri $path
      *
      * @throws \InvalidArgumentException
      * @return $this

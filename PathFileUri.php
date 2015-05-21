@@ -4,7 +4,7 @@ namespace Poirot\PathUri;
 use Poirot\PathUri\Interfaces\iPathFileUri;
 use Poirot\PathUri\Interfaces\iPathJoinedUri;
 
-class PathFileUri extends PathAbstractUri
+class PathFileUri extends PathUri
     implements iPathFileUri
 {
     protected $pathSep = '/';

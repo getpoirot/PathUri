@@ -2,10 +2,10 @@
 namespace Poirot\PathUri;
 
 use Poirot\Core\BuilderSetterTrait;
-use Poirot\PathUri\Interfaces\iPathAbstractUri;
+use Poirot\PathUri\Interfaces\iPathUri;
 
-abstract class PathAbstractUri
-    implements iPathAbstractUri
+abstract class PathUri
+    implements iPathUri
 {
     use BuilderSetterTrait {
         setupFromArray as protected __fromArray;
@@ -16,7 +16,7 @@ abstract class PathAbstractUri
     /**
      * Create a new URI object
      *
-     * @param  iPathAbstractUri|string|array $pathUri
+     * @param  iPathUri|string|array $pathUri
      *
      * @throws \InvalidArgumentException
      */
@@ -53,7 +53,7 @@ abstract class PathAbstractUri
      * note: it take a instance of pathUri object
      *   same as base object
      *
-     * @param iPathAbstractUri $path
+     * @param iPathUri $path
      *
      * @throws \InvalidArgumentException
      * @return $this

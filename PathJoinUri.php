@@ -1,14 +1,14 @@
 <?php
 namespace Poirot\PathUri;
 
-use Poirot\PathUri\Interfaces\iPathAbstractUri;
+use Poirot\PathUri\Interfaces\iPathUri;
 use Poirot\PathUri\Interfaces\iPathJoinedUri;
 
 /**
  * note: string paths usually must be normalized from
  *       the class that used this
  */
-class PathJoinUri extends PathAbstractUri
+class PathJoinUri extends PathUri
     implements iPathJoinedUri
 {
     // From SetterTrait ... {
@@ -282,13 +282,13 @@ class PathJoinUri extends PathAbstractUri
      *
      * - manipulate current path
      *
-     * @param iPathAbstractUri $pathUri
+     * @param iPathUri $pathUri
      *
      * @return $this
      */
     function append($pathUri)
     {
-        /** @var iPathAbstractUri $pathUri */
+        /** @var iPathUri $pathUri */
         $appendPath = $pathUri->getPath();
         $appendPath = array_filter($appendPath, function($p) {
             // Remove all ['',] from path
@@ -309,13 +309,13 @@ class PathJoinUri extends PathAbstractUri
      *
      * - manipulate current path
      *
-     * @param iPathAbstractUri $pathUri
+     * @param iPathUri $pathUri
      *
      * @return $this
      */
     function prepend($pathUri)
     {
-        /** @var iPathAbstractUri $pathUri */
+        /** @var iPathUri $pathUri */
         $finalPath = array_merge($pathUri->getPath(), $this->getPath());
         $this->setPath($finalPath);
 
