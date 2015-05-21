@@ -10,28 +10,7 @@ interface iBasePathUri
      *
      * @throws \InvalidArgumentException
      */
-    public function __construct($pathUri = null);
-
-    /**
-     * Set Uri Path
-     *
-     * ! null is to reset object and mean no path
-     *
-     * @param null|string|array $path
-     *
-     * @throws \InvalidArgumentException Uri not valid
-     * @return $this
-     */
-    function setUri($path);
-
-    /**
-     * Get Uri Path
-     *
-     * ['/', 'var', 'www', 'html']
-     *
-     * @return array
-     */
-    function getUri();
+    function __construct($pathUri = null);
 
     /**
      * Parse The String Uri To It's Structure

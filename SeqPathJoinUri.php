@@ -79,7 +79,7 @@ class SeqPathJoinUri extends AbstractPathUri
         }
 
         return [
-            'uri'       => $path,
+            'path'       => $path,
             'separator' => $DS,
         ];
     }
@@ -93,10 +93,10 @@ class SeqPathJoinUri extends AbstractPathUri
      *
      * @return $this
      */
-    function setUri($path)
+    function setPath($path)
     {
         if (is_string($path))
-            $path = $this->parse($path)['uri'];
+            $path = $this->parse($path)['path'];
 
         if ($path === null)
             $path = [];
@@ -120,7 +120,7 @@ class SeqPathJoinUri extends AbstractPathUri
      *
      * @return array
      */
-    function getUri()
+    function getPath()
     {
        return $this->_path;
     }
@@ -144,7 +144,7 @@ class SeqPathJoinUri extends AbstractPathUri
      * Get Array In Form Of AssocArray
      *
      * return [
-     *  'uri'      => ['', 'absolute', 'uri'],
+     *  'path'      => ['', 'absolute', 'path'],
      *  'separator' => '/',
      * ]
      *
@@ -153,7 +153,7 @@ class SeqPathJoinUri extends AbstractPathUri
     function toArray()
     {
         return [
-            'uri'       => $this->_path,
+            'path'      => $this->_path,
             'separator' => $this->getSeparator()
         ];
     }
@@ -219,7 +219,7 @@ class SeqPathJoinUri extends AbstractPathUri
     function normalize()
     {
         $paths = $this->__normalize($this->_path);
-        $this->setUri($paths);
+        $this->setPath($paths);
 
         return $this;
     }
@@ -292,7 +292,7 @@ class SeqPathJoinUri extends AbstractPathUri
     function append($pathUri)
     {
         /** @var iBasePathUri $pathUri */
-        $appendPath = $pathUri->toArray()['uri'];
+        $appendPath = $pathUri->toArray()['path'];
         $appendPath = array_filter($appendPath, function($p) {
             // Remove all ['',] from path
             // on appended path we don't want any absolute sign in
@@ -302,7 +302,7 @@ class SeqPathJoinUri extends AbstractPathUri
 
         $finalPath = array_merge($this->_path, $appendPath);
 
-        $this->setUri($finalPath);
+        $this->setPath($finalPath);
 
         return $this;
     }
@@ -319,8 +319,8 @@ class SeqPathJoinUri extends AbstractPathUri
     function prepend($pathUri)
     {
         /** @var iBasePathUri $pathUri */
-        $finalPath = array_merge($pathUri->toArray()['uri'], $this->_path);
-        $this->setUri($finalPath);
+        $finalPath = array_merge($pathUri->toArray()['path'], $this->_path);
+        $this->setPath($finalPath);
 
         return $this;
     }
@@ -345,7 +345,7 @@ class SeqPathJoinUri extends AbstractPathUri
     function mask($pathUri, $toggle = true)
     {
         $muchLength = $this->_path;
-        $less       = $pathUri->toArray()['uri'];
+        $less       = $pathUri->toArray()['path'];
 
         if ($toggle)
             (count($less) >= count($muchLength))
@@ -360,7 +360,7 @@ class SeqPathJoinUri extends AbstractPathUri
             unset($masked[$i]);
         }
 
-        $this->setUri($masked);
+        $this->setPath($masked);
 
         return $this;
     }
@@ -380,7 +380,7 @@ class SeqPathJoinUri extends AbstractPathUri
     function joint($pathUri, $toggle = true)
     {
         $muchLength = $this->_path;
-        $less       = $pathUri->toArray()['uri'];
+        $less       = $pathUri->toArray()['path'];
 
         if ($toggle)
             (count($less) >= count($muchLength))
@@ -395,7 +395,7 @@ class SeqPathJoinUri extends AbstractPathUri
             $similar[] = $v;
         }
 
-        $this->setUri($similar);
+        $this->setPath($similar);
 
         return $this;
     }

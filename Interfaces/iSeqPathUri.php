@@ -21,21 +21,32 @@ interface iSeqPathUri extends iBasePathUri
     // Parse Getter/Setter Methods:
 
     /**
-     * Set Path Separator
-     *
-     * @param string $sep
-     *
-     * @return $this
-     */
-    function setSeparator($sep);
-
-    /**
      * Get Path Separator
      *
      * @return string
      */
     function getSeparator();
 
+    /**
+     * Set Uri Path
+     *
+     * ! null is to reset object and mean no path
+     *
+     * @param null|string|array $path
+     *
+     * @throws \InvalidArgumentException Uri not valid
+     * @return $this
+     */
+    function setPath($path);
+
+    /**
+     * Get Uri Path
+     *
+     * ['/', 'var', 'www', 'html']
+     *
+     * @return array
+     */
+    function getPath();
 
     // Operation Methods:
 
