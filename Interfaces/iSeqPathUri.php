@@ -7,6 +7,15 @@ namespace Poirot\PathUri\Interfaces;
  * we have paths in form of arrays and separated with the separator
  * /var/www/html, http://yoursite.com/path/to/ser, send:/again/path/
  *
+ * - Normally, the empty path "" and absolute path "/" are considered equal as
+ *   defined in RFC 7230 Section 2.7.3.
+ *   But this method MUST NOT automatically
+ *   do this normalization because in contexts with a trimmed base path, e.g.
+ *   the front controller, this difference becomes significant. It's the task
+ *   of the user to handle both "" and "/"
+ *
+ *
+ *
  */
 interface iSeqPathUri extends iBasePathUri
 {
