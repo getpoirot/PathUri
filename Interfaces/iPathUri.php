@@ -13,11 +13,11 @@ interface iPathUri
     public function __construct($pathUri = null);
 
     /**
-     * Build Object From String
+     * Parse The String Uri To It's Structure
      *
-     * - parse string to associateArray setter
-     * - return value of this method must can be
-     *   used as an argument for fromArray
+     * - parse string to associateArray,
+     *   this array must can be used as an argument
+     *   for fromArray method
      *
      * @param string $pathStr
      *
@@ -39,15 +39,15 @@ interface iPathUri
     /**
      * Build Object From PathUri
      *
-     * note: it take a instance of pathUri object
-     *   same as base object
+     * note: always the pathUri instance on given argument must
+     *       be same as $this object
      *
      * @param iPathUri $path
      *
      * @throws \InvalidArgumentException
      * @return $this
      */
-    function fromPathUri(/*iPathAbstractUri*/ $path);
+    function fromPathUri(/*iPathUri*/ $path);
 
     /**
      * Is Absolute Path?
@@ -55,6 +55,32 @@ interface iPathUri
      * @return boolean
      */
     function isAbsolute();
+
+    /**
+     * Get Uri Depth
+     *
+     * note: in case of /var/www/html
+     *       0:/, 1:var, 2:www ...
+     *       depth is 3
+     *
+     * @return int
+     */
+    function getDepth();
+
+    /**
+     * Split Path And Update Object To New Path
+     *
+     * /var/www/html
+     * split(-1) => "/var/www"
+     * split(0)  => "/"
+     * split(1)  => "var/www/html"
+     *
+     * @param int      $start
+     * @param null|int $end
+     *
+     * @return $this
+     */
+    function split($start, $end = null);
 
     /**
      * Reset parts
@@ -66,12 +92,7 @@ interface iPathUri
     /**
      * Get Array In Form Of AssocArray
      *
-     * return [
-     *  'path'      => iPathJoinedUri,
-     *  'basename'  => 'name_with', # without extension
-     *  'extension' => 'ext',
-     *  'filename'  => 'name_with.ext',
-     * ]
+     * note: this array can be used as input for fromArray
      *
      * @return array
      */

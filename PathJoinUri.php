@@ -8,7 +8,7 @@ use Poirot\PathUri\Interfaces\iPathJoinedUri;
  * note: string paths usually must be normalized from
  *       the class that used this
  */
-class PathJoinUri extends PathUri
+class PathJoinUri extends AbstractPathUri
     implements iPathJoinedUri
 {
     // From SetterTrait ... {
@@ -35,51 +35,9 @@ class PathJoinUri extends PathUri
      *
      * @var array
      */
-    protected $path = [];
+    protected $_path = [];
 
     protected $separator = '/';
-
-    /**
-     * Set Path
-     *
-     * - Null Or Empty Array Means We Have No Path
-     *
-     * note: in case of string path using separator
-     *       to explode and build an array
-     *
-     * @param array|string|null $arrPath
-     *
-     * @return $this
-     */
-    function setPath($arrPath)
-    {
-        if (is_string($arrPath))
-            $arrPath = $this->parse($arrPath)['path'];
-
-        if ($arrPath === null)
-            $arrPath = [];
-
-        if (!is_array($arrPath))
-            throw new \InvalidArgumentException(sprintf(
-                'Path must be a string, null, or array, but given "%s".'
-                , is_object($arrPath) ? get_class($arrPath) : gettype($arrPath)
-            ));
-
-        // the associate array is useless
-        $this->path = array_values($arrPath);
-
-        return $this;
-    }
-
-    /**
-     * Get Path
-     *
-     * @return array
-     */
-    function getPath()
-    {
-        return $this->path;
-    }
 
     /**
      * Build Object From String
@@ -101,27 +59,53 @@ class PathJoinUri extends PathUri
                 , is_object($pathStr) ? get_class($pathStr) : gettype($pathStr)
             ));
 
+        $DS = $this->getSeparator();
+
         // remove last trailing "/"
-        $pathStr = Util::normalizeUnixPath($pathStr, $this->getSeparator());
+        $pathStr = Util::normalizeUnixPath($pathStr, $DS);
         if ($pathStr === $this->getSeparator())
             // in case of "/", explode create unwanted ['', '']
             // so i`ve check path string for decision
-            $path = [ self::ABSOLUTE_HOME, ];
+            $path = [ $DS, ];
         elseif ($pathStr === '')
             // Current Directory
             $path = [];
         else {
-            $path = $this->__normalize(explode($this->getSeparator(), $pathStr));
+            $path = $this->__normalize(explode($DS, $pathStr));
             if (isset($path[0]) && $path[0] == '')
                 // explode affect on absolute addresses
                 // start with separator. exp. "/var/www/"
-                $path[0] = self::ABSOLUTE_HOME;
+                $path[0] = $DS;
         }
 
         return [
             'path'      => $path,
-            'separator' => $this->getSeparator(),
+            'separator' => $DS,
         ];
+    }
+
+    /**
+     * Set Path
+     *
+     * !! Helper For SetterBuilder
+     *
+     */
+    protected function setPath($arrPath)
+    {
+        if (is_string($arrPath))
+            $arrPath = $this->parse($arrPath)['path'];
+
+        if ($arrPath === null)
+            $arrPath = [];
+
+        if (!is_array($arrPath))
+            throw new \InvalidArgumentException(sprintf(
+                'Path must be a string, null, or array, but given "%s".'
+                , is_object($arrPath) ? get_class($arrPath) : gettype($arrPath)
+            ));
+
+        // the associate array is useless
+        $this->_path = array_values($arrPath);
     }
 
     /**
@@ -131,12 +115,12 @@ class PathJoinUri extends PathUri
      */
     function isAbsolute()
     {
-        $p = $this->getPath();
+        $p = $this->_path;
 
         reset($p);
         $fi = current($p);
 
-        return $fi === self::ABSOLUTE_HOME || substr($fi, -1) === ':';
+        return $fi === $this->getSeparator() || substr($fi, -1) === ':';
     }
 
     /**
@@ -152,7 +136,7 @@ class PathJoinUri extends PathUri
     function toArray()
     {
         return [
-            'path'      => $this->getPath(),
+            'path'      => $this->_path,
             'separator' => $this->getSeparator()
         ];
     }
@@ -166,20 +150,22 @@ class PathJoinUri extends PathUri
      */
     function toString()
     {
-        $path   = $this->getPath();
+        $path   = $this->_path;
         if ($path == [])
             return '';
 
-        if ($path == [self::ABSOLUTE_HOME])
+        $DS = $this->getSeparator();
+
+        if ($path == [$DS])
             // its home, implode not working for on element
-            return $this->getSeparator();
+            return $DS;
 
         // add empty slashes after all
         // that implode work properly for
         // paths with one member
         // its removed by normalize at last
         $path[] = '';
-        $return = implode( $this->getSeparator(), $this->getPath() );
+        $return = implode( $this->getSeparator(), $this->_path );
 
         return Util::normalizeUnixPath($return, $this->getSeparator());
     }
@@ -215,7 +201,7 @@ class PathJoinUri extends PathUri
      */
     function normalize()
     {
-        $paths = $this->__normalize($this->getPath());
+        $paths = $this->__normalize($this->_path);
         $this->setPath($paths);
 
         return $this;
@@ -236,7 +222,7 @@ class PathJoinUri extends PathUri
         // Cleanup empty directories ".", "//":
         reset($paths); $i = 0; $indexes = [];
         while(($val = current($paths)) !== false) {
-            if (($val == self::ABSOLUTE_HOME || $val === '' || $val === '.') && $i > 0)
+            if (($val == $this->getSeparator() || $val === '' || $val === '.') && $i > 0)
                 $indexes[] = key($paths);
 
             $i++;
@@ -289,15 +275,15 @@ class PathJoinUri extends PathUri
     function append($pathUri)
     {
         /** @var iPathUri $pathUri */
-        $appendPath = $pathUri->getPath();
+        $appendPath = $pathUri->toArray()['path'];
         $appendPath = array_filter($appendPath, function($p) {
             // Remove all ['',] from path
             // on appended path we don't want any absolute sign in
             // array list
-            return $p !== self::ABSOLUTE_HOME;
+            return $p !== $this->getSeparator();
         });
 
-        $finalPath = array_merge($this->getPath(), $appendPath);
+        $finalPath = array_merge($this->_path, $appendPath);
 
         $this->setPath($finalPath);
 
@@ -316,7 +302,7 @@ class PathJoinUri extends PathUri
     function prepend($pathUri)
     {
         /** @var iPathUri $pathUri */
-        $finalPath = array_merge($pathUri->getPath(), $this->getPath());
+        $finalPath = array_merge($pathUri->toArray()['path'], $this->_path);
         $this->setPath($finalPath);
 
         return $this;
@@ -341,13 +327,12 @@ class PathJoinUri extends PathUri
      */
     function mask($pathUri, $toggle = true)
     {
-        $muchLength = $this->getPath();
-        $less       = $pathUri->getPath();
+        $muchLength = $this->_path;
+        $less       = $pathUri->toArray()['path'];
 
         if ($toggle)
-            (count($pathUri->getPath()) >= count($this->getPath()))
-                ? ( $muchLength = $pathUri->getPath() and $less = $this->getPath() )
-                : ( $muchLength = $this->getPath()    and $less = $pathUri->getPath() )
+            (count($less) >= count($muchLength))
+                ? ( $muchLength = $less and $less = $this->_path ) : null;
             ;
 
         $masked = $muchLength;
@@ -377,14 +362,13 @@ class PathJoinUri extends PathUri
      */
     function joint($pathUri, $toggle = true)
     {
-        $muchLength = $this->getPath();
-        $less       = $pathUri->getPath();
+        $muchLength = $this->_path;
+        $less       = $pathUri->toArray()['path'];
 
         if ($toggle)
-             (count($pathUri->getPath()) >= count($this->getPath()))
-                ? ( $muchLength = $pathUri->getPath() and $less = $this->getPath() )
-                : ( $muchLength = $this->getPath()    and $less = $pathUri->getPath() )
-             ;
+            (count($less) >= count($muchLength))
+                ? ( $muchLength = $less and $less = $this->_path ) : null;
+        ;
 
         $similar = []; // empty path
         foreach($muchLength as $i => $v) {
@@ -395,6 +379,43 @@ class PathJoinUri extends PathUri
         }
 
         $this->setPath($similar);
+
+        return $this;
+    }
+
+    /**
+     * Get Uri Depth
+     *
+     * note: in case of /var/www/html
+     *       0:/, 1:var, 2:www ...
+     *       depth is 3
+     *
+     * @return int
+     */
+    function getDepth()
+    {
+        return count($this->_path);
+    }
+
+    /**
+     * Split Path And Update Object To New Path
+     *
+     * /var/www/html
+     * split(-1) => "/var/www"
+     * split(0)  => "/..."
+     * split(1)  => "var/www/html"
+     *
+     * @param int      $start start index position
+     * @param null|int $end   end index position
+     *
+     * @return $this
+     */
+    function split($start, $end = null)
+    {
+        $ln = ($end === null) ? count($this->_path)
+            : $end - $start;
+        $path = array_slice($this->_path, $start, $ln);
+        $this->_path = $path;
 
         return $this;
     }
