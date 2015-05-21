@@ -14,8 +14,6 @@ namespace Poirot\PathUri\Interfaces;
  *   the front controller, this difference becomes significant. It's the task
  *   of the user to handle both "" and "/"
  *
- *
- *
  */
 interface iSeqPathUri extends iBasePathUri
 {

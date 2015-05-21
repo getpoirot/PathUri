@@ -50,6 +50,8 @@ abstract class AbstractPathUri
     /**
      * Build Object From PathUri
      *
+     * - don't reset this object, so values merged with new one
+     *
      * note: it take a instance of pathUri object
      *   same as base object
      *

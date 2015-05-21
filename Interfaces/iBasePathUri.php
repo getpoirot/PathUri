@@ -19,12 +19,15 @@ interface iBasePathUri
      *
      * @param null|string|array $path
      *
+     * @throws \InvalidArgumentException Uri not valid
      * @return $this
      */
     function setUri($path);
 
     /**
      * Get Uri Path
+     *
+     * ['/', 'var', 'www', 'html']
      *
      * @return array
      */
@@ -56,6 +59,8 @@ interface iBasePathUri
 
     /**
      * Build Object From PathUri
+     *
+     * - don't reset this object, so values merged with new one
      *
      * note: always the pathUri instance on given argument must
      *       be same as $this object

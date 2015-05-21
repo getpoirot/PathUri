@@ -116,6 +116,8 @@ class SeqPathJoinUri extends AbstractPathUri
     /**
      * Get Path
      *
+     * ['/', 'var', 'www', 'html']
+     *
      * @return array
      */
     function getUri()
