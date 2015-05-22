@@ -147,7 +147,7 @@ interface iHttpUri extends iBasePathUri
      * - entity setFrom query string,
      * - later: set query string as resource on entity object
      *
-     * @return iPoirotEntity
+     * @return iPQueryEntity
      */
     function getQuery();
 

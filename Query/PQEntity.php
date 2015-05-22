@@ -41,6 +41,6 @@ class PQEntity extends Entity
      */
     function toString()
     {
-        return http_build_query($this->getAs(new Entity())->borrow());
+        return http_build_query($this->getAs(new Entity));
     }
 }
