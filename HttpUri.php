@@ -4,6 +4,7 @@ namespace Poirot\PathUri;
 use Poirot\Core\Interfaces\iPoirotEntity;
 use Poirot\PathUri\Interfaces\iBasePathUri;
 use Poirot\PathUri\Interfaces\iHttpUri;
+use Poirot\PathUri\Interfaces\iPQueryEntity;
 use Poirot\PathUri\Interfaces\iSeqPathUri;
 use Poirot\PathUri\Query\PQEntity;
 
@@ -263,7 +264,7 @@ class HttpUri extends AbstractPathUri
      * - entity setFrom query string,
      * - later: set query string as resource on entity object
      *
-     * @return iPoirotEntity
+     * @return iPQueryEntity
      */
     function getQuery()
     {
@@ -399,21 +400,18 @@ class HttpUri extends AbstractPathUri
                 $uri .= ':' . $this->getPort();
         }
 
-        /*
-        if ($this->getPath()) {
-            $uri .= static::encodePath($this->getPath()->toString());
-        } elseif ($this->host && ($this->query || $this->fragment)) {
+        // TODO Encode path, query, fragment
+
+        if ($this->getPath())
+            $uri .= $this->getPath()->toString();
+        elseif ($this->getHost() && ($this->getQuery() || $this->getFragment()))
             $uri .= '/';
-        }
 
-        if ($this->query) {
-            $uri .= "?" . static::encodeQueryFragment($this->query);
-        }
+        if ($this->getQuery())
+            $uri .= "?" . $this->getQuery()->toString();
 
-        if ($this->fragment) {
-            $uri .= "#" . static::encodeQueryFragment($this->fragment);
-        }
-        */
+        if ($this->getFragment())
+            $uri .= "#" . $this->getFragment();
 
         return $uri;
     }
