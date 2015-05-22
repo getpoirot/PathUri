@@ -5,6 +5,7 @@ use Poirot\Core\Interfaces\iPoirotEntity;
 use Poirot\PathUri\Interfaces\iBasePathUri;
 use Poirot\PathUri\Interfaces\iHttpUri;
 use Poirot\PathUri\Interfaces\iSeqPathUri;
+use Poirot\PathUri\Query\PQEntity;
 
 class HttpUri extends AbstractPathUri
     implements iHttpUri
@@ -21,6 +22,8 @@ class HttpUri extends AbstractPathUri
     protected $userInfo;
     protected $host;
     protected $port;
+    protected $path;
+    protected $query;
     protected $fragment;
 
     /**
@@ -216,7 +219,18 @@ class HttpUri extends AbstractPathUri
      */
     function setPath($path)
     {
-        // TODO: Implement setPath() method.
+        if (is_string($path))
+            $path = new SeqPathJoinUri($path);
+
+        if (!$path instanceof iSeqPathUri)
+            throw new \InvalidArgumentException(sprintf(
+                'Path must be uri string or instance of iSeqPathUri, "%s" given instead.'
+                , is_object($path) ? get_class($path) : gettype($path)
+            ));
+
+        $this->path = $path;
+
+        return $this;
     }
 
     /**
@@ -226,7 +240,7 @@ class HttpUri extends AbstractPathUri
      */
     function getPath()
     {
-        // TODO: Implement getPath() method.
+        return $this->path;
     }
 
     /**
@@ -238,7 +252,9 @@ class HttpUri extends AbstractPathUri
      */
     function setQuery($query)
     {
-        // TODO: Implement setQuery() method.
+        $this->query = new PQEntity($query);
+
+        return $this;
     }
 
     /**
@@ -251,7 +267,7 @@ class HttpUri extends AbstractPathUri
      */
     function getQuery()
     {
-        // TODO: Implement getQuery() method.
+        return $this->query;
     }
 
     /**
@@ -337,6 +353,7 @@ class HttpUri extends AbstractPathUri
             'scheme'    => $this->getScheme(),
             'user_info' => $this->getUserInfo(),
             'host'      => $this->getHost(),
+            'port'      => $this->getPort(),
             'path'      => $this->getPath(),
             'query'     => $this->getQuery(),
             'fragment'  => $this->getFragment(),
