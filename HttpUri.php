@@ -12,6 +12,8 @@ class HttpUri extends AbstractPathUri
     const SCHEME_HTTP  = 'http';
     const SCHEME_HTTPS = 'https';
 
+    const PORT_DEFAULT = 80;
+
     /*
         URI parts:
     */
@@ -140,7 +142,7 @@ class HttpUri extends AbstractPathUri
      */
     function setHost($host)
     {
-        $this->host = $host;
+        $this->host = strtolower((string) $host);
 
         return $this;
     }
@@ -166,7 +168,7 @@ class HttpUri extends AbstractPathUri
      */
     function setPort($port)
     {
-        $this->port = $port;
+        $this->port = (int) $port;
 
         return $this;
     }
@@ -188,6 +190,9 @@ class HttpUri extends AbstractPathUri
      */
     function getPort()
     {
+        if ($this->port === self::PORT_DEFAULT)
+            return null;
+
         return $this->port;
     }
 
@@ -274,50 +279,6 @@ class HttpUri extends AbstractPathUri
     }
 
     /**
-     * Create a new URI object
-     *
-     * @param  iBasePathUri|string|array $pathUri
-     *
-     * @throws \InvalidArgumentException
-     */
-    function __construct($pathUri = null)
-    {
-        // TODO: Implement __construct() method.
-    }
-
-    /**
-     * Build Object From Array
-     *
-     * @param array $arrPath
-     *
-     * @throws \InvalidArgumentException
-     * @return $this
-     */
-    function fromArray(array $arrPath)
-    {
-        // TODO: Implement fromArray() method.
-    }
-
-    /**
-     * Build Object From PathUri
-     *
-     * - don't reset this object, so values merged with new one
-     *
-     * note: always the pathUri instance on given argument must
-     *       be same as $this object
-     *
-     * @param iBasePathUri $path
-     *
-     * @throws \InvalidArgumentException
-     * @return $this
-     */
-    function fromPathUri(/*iPathUri*/
-        $path)
-    {
-        // TODO: Implement fromPathUri() method.
-    }
-
-    /**
      * Is Absolute Path?
      *
      * - in most cases substr[0]-1 == ":" mean we have on absolute path
@@ -340,7 +301,7 @@ class HttpUri extends AbstractPathUri
      */
     function getDepth()
     {
-        // TODO: Implement getDepth() method.
+        return count($this->toArray()) + $this->getPath()->getDepth();
     }
 
     /**
@@ -359,16 +320,8 @@ class HttpUri extends AbstractPathUri
     function split($start, $end = null)
     {
         // TODO: Implement split() method.
-    }
 
-    /**
-     * Reset parts
-     *
-     * @return $this
-     */
-    function reset()
-    {
-        // TODO: Implement reset() method.
+        return $this;
     }
 
     /**
@@ -380,7 +333,16 @@ class HttpUri extends AbstractPathUri
      */
     function toArray()
     {
-        // TODO: Implement toArray() method.
+        $parse = [
+            'scheme'    => $this->getScheme(),
+            'user_info' => $this->getUserInfo(),
+            'host'      => $this->getHost(),
+            'path'      => $this->getPath(),
+            'query'     => $this->getQuery(),
+            'fragment'  => $this->getFragment(),
+        ];
+
+        return $parse;
     }
 
     /**
@@ -390,7 +352,9 @@ class HttpUri extends AbstractPathUri
      */
     function normalize()
     {
-        // TODO: Implement normalize() method.
+        $this->getPath()->normalize();
+
+        return $this;
     }
 
     /**

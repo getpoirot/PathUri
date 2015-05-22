@@ -101,6 +101,9 @@ interface iBasePathUri
     /**
      * Get Array In Form Of AssocArray
      *
+     * ! this must contains all data in object even ones
+     *   that is null
+     *
      * note: this array can be used as input for fromArray
      *
      * @return array
