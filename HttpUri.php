@@ -10,10 +10,10 @@ use Poirot\PathUri\Query\PQEntity;
 class HttpUri extends AbstractPathUri
     implements iHttpUri
 {
-    const SCHEME_HTTP  = 'http';
-    const SCHEME_HTTPS = 'https';
-
-    static $PORT_DEFAULT = 80;
+    static $SCHEME = [
+        'http'  => 80,
+        'https' => 443,
+    ];
 
     /*
         URI parts:
@@ -80,13 +80,16 @@ class HttpUri extends AbstractPathUri
      */
     function setScheme($scheme)
     {
-        if(!defined(get_class($this).'::SCHEME_'.strtoupper($scheme)))
+        $scheme = strtolower($scheme);
+
+        if(!empty($scheme) && !isset(self::$SCHEME[$scheme]))
             throw new \InvalidArgumentException(sprintf(
-                'Scheme "%s" not defined.'
+                'Unsupported scheme "%s"; must be any empty string or in the set (%s)'
                 , $scheme
+                , implode(', ', array_keys(self::$SCHEME))
             ));
 
-        $this->scheme = strtolower((string) $scheme);
+        $this->scheme = $scheme;
 
         return $this;
     }
@@ -181,7 +184,14 @@ class HttpUri extends AbstractPathUri
      */
     function setPort($port)
     {
-        $this->port = (int) $port;
+        if ($port < 1 || $port > 65535) {
+            throw new \InvalidArgumentException(sprintf(
+                'Invalid port "%d" specified; must be a valid TCP/UDP port',
+                $port
+            ));
+        }
+
+        $this->port = $port;
 
         return $this;
     }
@@ -203,7 +213,8 @@ class HttpUri extends AbstractPathUri
      */
     function getPort()
     {
-        if ($this->port === self::$PORT_DEFAULT)
+        $scheme = $this->getScheme();
+        if (!$scheme || ($this->port === self::$SCHEME[$scheme]))
             return null;
 
         return $this->port;
@@ -237,6 +248,18 @@ class HttpUri extends AbstractPathUri
                 'Path must be uri string or instance of iSeqPathUri, "%s" given instead.'
                 , is_object($path) ? get_class($path) : gettype($path)
             ));
+
+        $pathStr = $path->toString();
+
+        if (strpos($pathStr, '?') !== false)
+            throw new \InvalidArgumentException(
+                'Invalid path provided; must not contain a query string'
+            );
+
+        if (strpos($pathStr, '#') !== false)
+            throw new \InvalidArgumentException(
+                'Invalid path provided; must not contain a URI fragment'
+            );
 
         $this->path = $path->setSeparator($this->getSeparator());
 
