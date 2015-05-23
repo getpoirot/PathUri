@@ -389,7 +389,7 @@ class HttpUri extends AbstractPathUri
         elseif ($this->getHost() && ($this->getQuery() || $this->getFragment()))
             $uri .= '/';
 
-        if ($this->getQuery()) {
+        if ($this->getQuery()->borrow()) {
             $regex   = '/(?:[^' .'a-zA-Z0-9_\-\.~' .'!\$&\'\(\)\*\+,;=' .'%:@\/\?]+|%(?![A-Fa-f0-9]{2}))/';
             $uri .= "?" . preg_replace_callback($regex, $replace, $this->getQuery()->toString());
         }
