@@ -417,25 +417,23 @@ class SeqPathJoinUri extends AbstractPathUri
     }
 
     /**
-     * Split Path And Update Object To New Path
+     * Split Path
      *
      * /var/www/html
      * split(-1) => "/var/www"
      * split(0)  => "/..."
      * split(1)  => "var/www/html"
      *
-     * @param int      $start start index position
-     * @param null|int $end   end index position
+     * @param int      $start  start index position
+     * @param null|int $length end index position
      *
-     * @return $this
+     * @return string
      */
-    function split($start, $end = null)
+    function split($start, $length = null)
     {
-        $ln = ($end === null) ? count($this->_path)
-            : $end - $start;
-        $path = array_slice($this->_path, $start, $ln);
-        $this->_path = $path;
+        $path = array_slice($this->_path, $start, $length);
+        $path = implode($this->getSeparator(), $path);
 
-        return $this;
+        return $path;
     }
 }

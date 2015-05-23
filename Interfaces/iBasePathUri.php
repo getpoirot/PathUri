@@ -32,6 +32,13 @@ interface iBasePathUri
     function parse($pathStr);
 
     /**
+     * Get Path Separator
+     *
+     * @return string
+     */
+    function getSeparator();
+
+    /**
      * Build Object From Array
      *
      * @param array $arrPath
@@ -64,32 +71,6 @@ interface iBasePathUri
      * @return boolean
      */
     function isAbsolute();
-
-    /**
-     * Get Uri Depth
-     *
-     * note: in case of /var/www/html
-     *       0:/, 1:var, 2:www ...
-     *       depth is 3
-     *
-     * @return int
-     */
-    function getDepth();
-
-    /**
-     * Split Path And Update Object To New Path
-     *
-     * /var/www/html
-     * split(-1) => "/var/www"
-     * split(0)  => "/"
-     * split(1)  => "var/www/html"
-     *
-     * @param int      $start
-     * @param null|int $end
-     *
-     * @return $this
-     */
-    function split($start, $end = null);
 
     /**
      * Reset parts

@@ -21,11 +21,13 @@ interface iSeqPathUri extends iBasePathUri
     // Parse Getter/Setter Methods:
 
     /**
-     * Get Path Separator
+     * Set Path Separator
      *
-     * @return string
+     * @param string $separator
+     *
+     * @return $this
      */
-    function getSeparator();
+    function setSeparator($separator);
 
     /**
      * Set Uri Path
@@ -49,6 +51,32 @@ interface iSeqPathUri extends iBasePathUri
     function getPath();
 
     // Operation Methods:
+
+    /**
+     * Get Uri Depth
+     *
+     * note: in case of /var/www/html
+     *       0:/, 1:var, 2:www ...
+     *       depth is 3
+     *
+     * @return int
+     */
+    function getDepth();
+
+    /**
+     * Split Path
+     *
+     * /var/www/html
+     * split(-1) => "/var/www"
+     * split(0)  => "/"
+     * split(1)  => "var/www/html"
+     *
+     * @param int      $start
+     * @param null|int $length
+     *
+     * @return string
+     */
+    function split($start, $length = null);
 
     /**
      * Append Path

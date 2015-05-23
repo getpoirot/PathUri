@@ -2,7 +2,6 @@
 namespace Poirot\PathUri;
 
 use Poirot\Core\Interfaces\iPoirotEntity;
-use Poirot\PathUri\Interfaces\iBasePathUri;
 use Poirot\PathUri\Interfaces\iHttpUri;
 use Poirot\PathUri\Interfaces\iPQueryEntity;
 use Poirot\PathUri\Interfaces\iSeqPathUri;
@@ -14,7 +13,7 @@ class HttpUri extends AbstractPathUri
     const SCHEME_HTTP  = 'http';
     const SCHEME_HTTPS = 'https';
 
-    const PORT_DEFAULT = 80;
+    static $PORT_DEFAULT = 80;
 
     /*
         URI parts:
@@ -59,6 +58,16 @@ class HttpUri extends AbstractPathUri
         $return = array_merge($parse, $return);
 
         return $return;
+    }
+
+    /**
+     * Get Path Separator
+     *
+     * @return string
+     */
+    function getSeparator()
+    {
+        return '/';
     }
 
     /**
@@ -194,7 +203,7 @@ class HttpUri extends AbstractPathUri
      */
     function getPort()
     {
-        if ($this->port === self::PORT_DEFAULT)
+        if ($this->port === self::$PORT_DEFAULT)
             return null;
 
         return $this->port;
@@ -229,7 +238,7 @@ class HttpUri extends AbstractPathUri
                 , is_object($path) ? get_class($path) : gettype($path)
             ));
 
-        $this->path = $path;
+        $this->path = $path->setSeparator($this->getSeparator());
 
         return $this;
     }
@@ -308,40 +317,6 @@ class HttpUri extends AbstractPathUri
     }
 
     /**
-     * Get Uri Depth
-     *
-     * note: in case of /var/www/html
-     *       0:/, 1:var, 2:www ...
-     *       depth is 3
-     *
-     * @return int
-     */
-    function getDepth()
-    {
-        return count($this->toArray()) + $this->getPath()->getDepth();
-    }
-
-    /**
-     * Split Path And Update Object To New Path
-     *
-     * /var/www/html
-     * split(-1) => "/var/www"
-     * split(0)  => "/"
-     * split(1)  => "var/www/html"
-     *
-     * @param int $start
-     * @param null|int $end
-     *
-     * @return $this
-     */
-    function split($start, $end = null)
-    {
-        // TODO: Implement split() method.
-
-        return $this;
-    }
-
-    /**
      * Get Array In Form Of AssocArray
      *
      * note: this array can be used as input for fromArray
@@ -400,18 +375,26 @@ class HttpUri extends AbstractPathUri
                 $uri .= ':' . $this->getPort();
         }
 
-        // TODO Encode path, query, fragment
+        $replace = function ($match) {
+            return rawurlencode($match[0]);
+        };
 
-        if ($this->getPath())
-            $uri .= $this->getPath()->toString();
+        if ($this->getPath()) {
+            $regex   = '/(?:[^' .'a-zA-Z0-9_\-\.~'. ':@&=\+\$,\/;%]+|%(?![A-Fa-f0-9]{2}))/';
+            $uri .= preg_replace_callback($regex, $replace, $this->getPath()->toString());
+        }
         elseif ($this->getHost() && ($this->getQuery() || $this->getFragment()))
             $uri .= '/';
 
-        if ($this->getQuery())
-            $uri .= "?" . $this->getQuery()->toString();
+        if ($this->getQuery()) {
+            $regex   = '/(?:[^' .'a-zA-Z0-9_\-\.~' .'!\$&\'\(\)\*\+,;=' .'%:@\/\?]+|%(?![A-Fa-f0-9]{2}))/';
+            $uri .= "?" . preg_replace_callback($regex, $replace, $this->getQuery()->toString());
+        }
 
-        if ($this->getFragment())
-            $uri .= "#" . $this->getFragment();
+        if ($this->getFragment()) {
+            $regex   = '/(?:[^' .'a-zA-Z0-9_\-\.~' .'!\$&\'\(\)\*\+,;=' .'%:@\/\?]+|%(?![A-Fa-f0-9]{2}))/';
+            $uri .= "#" . preg_replace_callback($regex, $replace, $this->getFragment());
+        }
 
         return $uri;
     }
