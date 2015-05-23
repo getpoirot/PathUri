@@ -262,7 +262,7 @@ class HttpUri extends AbstractPathUri
      */
     function setQuery($query)
     {
-        $this->query = new PQEntity($query);
+        $this->getQuery()->setFrom($query);
 
         return $this;
     }
@@ -277,6 +277,9 @@ class HttpUri extends AbstractPathUri
      */
     function getQuery()
     {
+        if (!$this->query)
+            $this->query = new PQEntity;
+
         return $this->query;
     }
 
