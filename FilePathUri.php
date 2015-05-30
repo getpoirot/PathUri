@@ -1,20 +1,20 @@
 <?php
 namespace Poirot\PathUri;
 
-use Poirot\PathUri\Interfaces\iFileBasePathUri;
-use Poirot\PathUri\Interfaces\iSeqBasePathUri;
+use Poirot\PathUri\Interfaces\iFilePathUri;
+use Poirot\PathUri\Interfaces\iSeqPathUri;
 
-class FilePathUri extends PathUri
-    implements iFileBasePathUri
+class FilePathUri extends SeqPathJoinUri
+    implements iFilePathUri
 {
     protected $pathSep = '/';
 
     /**
-     * @var iSeqBasePathUri
+     * @var iSeqPathUri
      */
     protected $basepath;
     /**
-     * @var iSeqBasePathUri
+     * @var iSeqPathUri
      */
     protected $path;
     protected $basename;
@@ -136,7 +136,7 @@ class FilePathUri extends PathUri
         $path = $filePath->normalize()
             ->toArray()['path'];
 
-        return (isset($path[0]) && $path[0] == iSeqBasePathUri::ABSOLUTE_HOME);
+        return (isset($path[0]) && $path[0] == $this->getSeparator());
     }
 
     /**
@@ -208,7 +208,7 @@ class FilePathUri extends PathUri
      *   and it can be changed by setPathStrMode
      *   later
      *
-     * @param iSeqBasePathUri|string|null $pathUri
+     * @param iSeqPathUri|string|null $pathUri
      *
      * @throws \InvalidArgumentException
      * @return $this
@@ -225,7 +225,7 @@ class FilePathUri extends PathUri
                 'path'      => $pathUri,
                 'separator' => $this->getSeparator()
             ]);
-        elseif ($pathUri instanceof iSeqBasePathUri)
+        elseif ($pathUri instanceof iSeqPathUri)
             $pathUri->setSeparator($this->getSeparator());
         else
             throw new \InvalidArgumentException(sprintf(
@@ -246,7 +246,7 @@ class FilePathUri extends PathUri
      * - override path separator from this class
      * - create new empty path instance if not set
      *
-     * @return iSeqBasePathUri
+     * @return iSeqPathUri
      */
     function getBasepath()
     {
@@ -346,7 +346,7 @@ class FilePathUri extends PathUri
     /**
      * Set Path To File/Directory
      *
-     * @param iSeqBasePathUri|string $pathUri
+     * @param iSeqPathUri|string $pathUri
      *
      * @return $this
      */
@@ -362,7 +362,7 @@ class FilePathUri extends PathUri
                 'path'      => $pathUri,
                 'separator' => $this->getSeparator()
             ]);
-        elseif ($pathUri instanceof iSeqBasePathUri)
+        elseif ($pathUri instanceof iSeqPathUri)
             $pathUri->setSeparator($this->getSeparator());
         else
             throw new \InvalidArgumentException(sprintf(
@@ -383,7 +383,7 @@ class FilePathUri extends PathUri
      * - override path separator from this class
      * - create new empty path instance if not set
      *
-     * @return iSeqBasePathUri
+     * @return iSeqPathUri
      */
     function getPath()
     {
