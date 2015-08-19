@@ -285,7 +285,7 @@ class HttpUri extends AbstractPathUri
      */
     function setQuery($query)
     {
-        $this->getQuery()->setFrom($query);
+        $this->getQuery()->from($query);
 
         return $this;
     }
@@ -361,7 +361,10 @@ class HttpUri extends AbstractPathUri
             'fragment'  => $this->getFragment(),
         ];
 
-        return $parse;
+        ## only return values that not null
+        return array_filter($parse, function($v) {
+            return !($v === null);
+        });
     }
 
     /**
