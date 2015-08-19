@@ -389,10 +389,9 @@ class HttpUri extends AbstractPathUri
         $uri = '';
 
         if ($this->getScheme())
-            $uri .= $this->getScheme() . ':';
+            $uri .= $this->getScheme() . ':'. '//';
 
         if ($this->getHost() !== null) {
-            $uri .= '//';
             if ($this->getUserInfo())
                 $uri .= $this->getUserInfo() . '@';
 
@@ -409,7 +408,7 @@ class HttpUri extends AbstractPathUri
             $regex   = '/(?:[^' .'a-zA-Z0-9_\-\.~'. ':@&=\+\$,\/;%]+|%(?![A-Fa-f0-9]{2}))/';
             $uri .= preg_replace_callback($regex, $replace, $this->getPath()->toString());
         }
-        elseif ($this->getHost() && ($this->getQuery() || $this->getFragment()))
+        elseif ($this->getHost() && (!$this->getQuery()->isEmpty() || $this->getFragment()))
             $uri .= '/';
 
         if ($this->getQuery()->borrow()) {
