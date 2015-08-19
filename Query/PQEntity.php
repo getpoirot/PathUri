@@ -2,6 +2,7 @@
 namespace Poirot\PathUri\Query;
 
 use Poirot\Core\Entity;
+use Poirot\Core\Interfaces\EntityInterface;
 use Poirot\Core\Interfaces\iPoirotEntity;
 use Poirot\PathUri\Interfaces\iPQueryEntity;
 
@@ -11,13 +12,18 @@ class PQEntity extends Entity
     /**
      * @override
      *
-     * @param string|array|iPoirotEntity $resource
+     * Set Properties
      *
-     * @return iPoirotEntity
+     * - You can implement this method on subclasses
+     *
+     * @param EntityInterface $resource
+     *
+     * @throws \InvalidArgumentException
+     * @return array
      */
     function __setFrom($resource)
     {
-        $this->__validateProps($resource);
+        $resource = parent::__setFrom($resource);
 
         if (is_string($resource))
             parse_str($resource, $resource);
