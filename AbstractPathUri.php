@@ -22,29 +22,32 @@ abstract class AbstractPathUri
      */
     function __construct($pathUri = null)
     {
-        if (is_object($pathUri)) {
-            if (!$pathUri instanceof $this)
-                throw new \InvalidArgumentException(sprintf(
-                    'PathUri must be instanceof "%s" but "%s" given.'
-                    , get_class($this)
-                    , get_class($pathUri)
-                ));
+        if ($pathUri !== null)
+            $this->from($pathUri);
+    }
 
-            $pathUri = $pathUri->toArray();
-        }
+    /**
+     * Set From Resource
+     *
+     * @param  iBasePathUri|string|array $pathUri
+     *
+     * @throws \InvalidArgumentException
+     * @return $this
+     */
+    function from($pathUri)
+    {
+        if (is_string($pathUri))
+            $pathUri = $this->parse($pathUri);
 
-        if ($pathUri !== null) {
-            if (is_string($pathUri))
-                $pathUri = $this->parse($pathUri);
-
-            if (is_array($pathUri))
-                $this->fromArray($pathUri);
-            else
-                throw new \InvalidArgumentException(sprintf(
-                    'PathUri must be instanceof iPathUri, Array or String, given: %s'
-                    , is_object($pathUri) ? get_class($pathUri) : gettype($pathUri)
-                ));
-        }
+        if (is_array($pathUri))
+            $this->fromArray($pathUri);
+        elseif (is_object($pathUri))
+            $this->fromPathUri($pathUri);
+        else
+            throw new \InvalidArgumentException(sprintf(
+                'PathUri must be instanceof iPathUri, Array or String, given: %s'
+                , is_object($pathUri) ? get_class($pathUri) : gettype($pathUri)
+            ));
     }
 
     /**
