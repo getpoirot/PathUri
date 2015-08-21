@@ -363,6 +363,9 @@ class HttpUri extends AbstractPathUri
 
         ## only return values that not null
         return array_filter($parse, function($v) {
+            if ($v instanceof iPoirotEntity)
+                return !$v->isEmpty();
+
             return !($v === null);
         });
     }
