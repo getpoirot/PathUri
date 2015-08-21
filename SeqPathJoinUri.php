@@ -419,20 +419,22 @@ class SeqPathJoinUri extends AbstractPathUri
     /**
      * Split Path
      *
+     * - return new pathUri instance with split
+     *
      * /var/www/html
      * split(-1) => "/var/www"
-     * split(0)  => "/..."
+     * split(0)  => "/"
      * split(1)  => "var/www/html"
      *
-     * @param int      $start  start index position
-     * @param null|int $length end index position
+     * @param int      $start
+     * @param null|int $length
      *
-     * @return string
+     * @return iSeqPathUri
      */
     function split($start, $length = null)
     {
         $path = array_slice($this->_path, $start, $length);
-        $path = implode($this->getSeparator(), $path);
+        $path = new self(['path' => $path]);
 
         return $path;
     }

@@ -66,6 +66,8 @@ interface iSeqPathUri extends iBasePathUri
     /**
      * Split Path
      *
+     * - return new pathUri instance with split
+     *
      * /var/www/html
      * split(-1) => "/var/www"
      * split(0)  => "/"
@@ -74,7 +76,7 @@ interface iSeqPathUri extends iBasePathUri
      * @param int      $start
      * @param null|int $length
      *
-     * @return string
+     * @return iSeqPathUri
      */
     function split($start, $length = null);
 
