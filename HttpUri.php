@@ -55,6 +55,11 @@ class HttpUri extends AbstractPathUri
         }
 
         $parse  = parse_url($pathStr);
+        if (false === $parse)
+            throw new \InvalidArgumentException(
+                'The source URI string seems invalid.'
+            );
+
         $return = array_merge($parse, $return);
 
         return $return;
