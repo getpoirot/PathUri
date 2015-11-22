@@ -1,24 +1,52 @@
 <?php
 namespace Poirot\PathUri\Psr;
 
+use Poirot\PathUri\Interfaces\iBasePathUri;
+
 class HttpUri implements UriInterface
 {
+    /** @var \Poirot\PathUri\HttpUri */
+    protected $httpUri;
+
     /**
      * Construct
      *
-     * @param string $uri
-     * @throws \InvalidArgumentException on non-string $uri argument
+     * @param iBasePathUri|string|array $uri
      */
-    function __construct($uri = '')
+    function __construct($uri)
     {
-        if (! is_string($uri))
-            throw new \InvalidArgumentException(sprintf(
-                'URI passed to constructor must be a string; received (%s).',
-                \Poirot\Core\flatten($uri)
-            ));
+        if ($uri instanceof \Poirot\PathUri\HttpUri)
+            $this->httpUri = $uri;
+        else
+            $this->httpUri = new \Poirot\PathUri\HttpUri($uri);
+    }
 
-        if (! empty($uri))
-            $this->parseUri($uri);
+    /**
+     * Return the string representation as a URI reference.
+     *
+     * Depending on which components of the URI are present, the resulting
+     * string is either a full URI or relative reference according to RFC 3986,
+     * Section 4.1. The method concatenates the various components of the URI,
+     * using the appropriate delimiters:
+     *
+     * - If a scheme is present, it MUST be suffixed by ":".
+     * - If an authority is present, it MUST be prefixed by "//".
+     * - The path can be concatenated without delimiters. But there are two
+     *   cases where the path has to be adjusted to make the URI reference
+     *   valid as PHP does not allow to throw an exception in __toString():
+     *     - If the path is rootless and an authority is present, the path MUST
+     *       be prefixed by "/".
+     *     - If the path is starting with more than one "/" and no authority is
+     *       present, the starting slashes MUST be reduced to one.
+     * - If a query is present, it MUST be prefixed by "?".
+     * - If a fragment is present, it MUST be prefixed by "#".
+     *
+     * @see http://tools.ietf.org/html/rfc3986#section-4.1
+     * @return string
+     */
+    function __toString()
+    {
+        return $this->httpUri->toString();
     }
 
     /**
@@ -37,7 +65,7 @@ class HttpUri implements UriInterface
      */
     function getScheme()
     {
-        // TODO: Implement getScheme() method.
+        return $this->httpUri->getScheme();
     }
 
     /**
@@ -60,7 +88,19 @@ class HttpUri implements UriInterface
      */
     function getAuthority()
     {
-        // TODO: Implement getAuthority() method.
+        $host = $this->httpUri->getHost();
+        if (empty($host))
+            return '';
+
+        $authority = $host;
+        $userInfo  = $this->httpUri->getUserInfo();
+        if (! empty($userInfo))
+            $authority = $userInfo . '@' . $authority;
+
+        if ($port = $this->httpUri->getPort())
+            $authority .= ':' . $port;
+
+        return $authority;
     }
 
     /**
@@ -80,7 +120,7 @@ class HttpUri implements UriInterface
      */
     function getUserInfo()
     {
-        // TODO: Implement getUserInfo() method.
+        return $this->httpUri->getUserInfo();
     }
 
     /**
@@ -96,7 +136,7 @@ class HttpUri implements UriInterface
      */
     function getHost()
     {
-        // TODO: Implement getHost() method.
+        return $this->httpUri->getHost();
     }
 
     /**
@@ -116,7 +156,7 @@ class HttpUri implements UriInterface
      */
     function getPort()
     {
-        // TODO: Implement getPort() method.
+        return $this->httpUri->getPort();
     }
 
     /**
@@ -146,7 +186,7 @@ class HttpUri implements UriInterface
      */
     function getPath()
     {
-        // TODO: Implement getPath() method.
+        return $this->httpUri->getPath()->toString();
     }
 
     /**
@@ -171,7 +211,7 @@ class HttpUri implements UriInterface
      */
     function getQuery()
     {
-        // TODO: Implement getQuery() method.
+        return $this->httpUri->getQuery()->toString();
     }
 
     /**
@@ -192,7 +232,7 @@ class HttpUri implements UriInterface
      */
     function getFragment()
     {
-        // TODO: Implement getFragment() method.
+        return $this->httpUri->getFragment();
     }
 
     /**
@@ -212,7 +252,14 @@ class HttpUri implements UriInterface
      */
     function withScheme($scheme)
     {
-        // TODO: Implement withScheme() method.
+        $scheme = $this->httpUri->__filterScheme($scheme);
+        if ($scheme === $this->getScheme())
+            return $this;
+
+        $new = clone $this;
+        $new->httpUri->setScheme($scheme);
+
+        return $new;
     }
 
     /**
@@ -231,7 +278,15 @@ class HttpUri implements UriInterface
      */
     function withUserInfo($user, $password = null)
     {
-        // TODO: Implement withUserInfo() method.
+        (!$password) ?: $user .= ':'.$password;
+
+        if ($user === $this->httpUri->getUserInfo())
+            return $this;
+
+        $new = clone $this;
+        $new->httpUri->setUserInfo($user);
+
+        return $new;
     }
 
     /**
@@ -248,7 +303,13 @@ class HttpUri implements UriInterface
      */
     function withHost($host)
     {
-        // TODO: Implement withHost() method.
+        if ($host === $this->httpUri->getHost())
+            return $this;
+
+        $new = clone $this;
+        $new->httpUri->setHost($host);
+
+        return $new;
     }
 
     /**
@@ -270,7 +331,15 @@ class HttpUri implements UriInterface
      */
     function withPort($port)
     {
-        // TODO: Implement withPort() method.
+        $port = (int) $port;
+
+        if ($port === $this->httpUri->getPort())
+            return $this;
+
+        $new = clone $this;
+        $new->httpUri->setPort($port);
+
+        return $new;
     }
 
     /**
@@ -297,7 +366,17 @@ class HttpUri implements UriInterface
      */
     function withPath($path)
     {
-        // TODO: Implement withPath() method.
+        $path    = (string) $path;
+        $pathUri = clone $this->httpUri->getPath();
+        $pathUri->setPath($path);
+
+        if ($pathUri->toString() === $this->httpUri->getPath()->toString())
+            return $this;
+
+        $new = clone $this;
+        $new->httpUri->setPath($path);
+
+        return $new;
     }
 
     /**
@@ -317,7 +396,14 @@ class HttpUri implements UriInterface
      */
     function withQuery($query)
     {
-        // TODO: Implement withQuery() method.
+        $query = (string) $query;
+        if ($query === $this->httpUri->getQuery()->toString())
+            return $this;
+
+        $new = clone $this->httpUri;
+        $new->setQuery($query);
+
+        return $new;
     }
 
     /**
@@ -336,34 +422,20 @@ class HttpUri implements UriInterface
      */
     function withFragment($fragment)
     {
-        // TODO: Implement withFragment() method.
+        $fragment = (string) $fragment;
+        if ($fragment === $this->httpUri->getFragment())
+            return $this;
+
+        $new = clone $this;
+        $new->httpUri->setFragment($fragment);
+
+        return $new;
     }
 
-    /**
-     * Return the string representation as a URI reference.
-     *
-     * Depending on which components of the URI are present, the resulting
-     * string is either a full URI or relative reference according to RFC 3986,
-     * Section 4.1. The method concatenates the various components of the URI,
-     * using the appropriate delimiters:
-     *
-     * - If a scheme is present, it MUST be suffixed by ":".
-     * - If an authority is present, it MUST be prefixed by "//".
-     * - The path can be concatenated without delimiters. But there are two
-     *   cases where the path has to be adjusted to make the URI reference
-     *   valid as PHP does not allow to throw an exception in __toString():
-     *     - If the path is rootless and an authority is present, the path MUST
-     *       be prefixed by "/".
-     *     - If the path is starting with more than one "/" and no authority is
-     *       present, the starting slashes MUST be reduced to one.
-     * - If a query is present, it MUST be prefixed by "?".
-     * - If a fragment is present, it MUST be prefixed by "#".
-     *
-     * @see http://tools.ietf.org/html/rfc3986#section-4.1
-     * @return string
-     */
-    function __toString()
+
+
+    function __clone()
     {
-        // TODO: Implement __toString() method.
+        $this->httpUri = clone $this->httpUri;
     }
 }
