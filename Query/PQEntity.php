@@ -23,12 +23,10 @@ class PQEntity extends Entity
      */
     function __setFrom($resource)
     {
-        $resource = parent::__setFrom($resource);
-
         if (is_string($resource))
             parse_str($resource, $resource);
 
-        return $resource;
+        return parent::__setFrom($resource);
     }
 
     protected function __validateProps($props)

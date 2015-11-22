@@ -39,6 +39,9 @@ class SeqPathJoinUri extends AbstractPathUri
 
     protected $separator = '/';
 
+    /** @var \Closure */
+    protected $encodeUri;
+
     /**
      * Build Object From String
      *
@@ -81,9 +84,48 @@ class SeqPathJoinUri extends AbstractPathUri
         }
 
         return [
-            'path'       => $path,
+            'path'      => $path,
             'separator' => $DS,
         ];
+    }
+
+    /**
+     * Set Encode Uri
+     *
+     * @param \Closure $encoder
+     *
+     * @return $this
+     */
+    function setEncodeUri(\Closure $encoder)
+    {
+        $this->encodeUri = $encoder;
+
+        return $this;
+    }
+
+    /**
+     * Get Encode Uri
+     *
+     * @return \Closure
+     */
+    function getEncodeUri()
+    {
+        if ($this->encodeUri)
+            return $this->encodeUri;
+
+        // ..
+
+        $this->encodeUri = function($pathStr) {
+            return preg_replace_callback(
+                '/(?:[^a-zA-Z0-9_\-\.~:@&=\+\$,\/;%]+|%(?![A-Fa-f0-9]{2}))/',
+                function (array $matches) {
+                    return rawurlencode($matches[0]);
+                }
+                , $pathStr
+            );
+        };
+
+        return $this->getEncodeUri();
     }
 
     /**
@@ -185,6 +227,7 @@ class SeqPathJoinUri extends AbstractPathUri
         // its removed by normalize at last
         $path[] = '';
         $return = implode( $this->getSeparator(), $this->_path );
+        $return = $this->getEncodeUri()->__invoke($return);
 
         return Util::normalizeUnixPath($return, $this->getSeparator());
     }

@@ -21,6 +21,22 @@ interface iSeqPathUri extends iBasePathUri
     // Parse Getter/Setter Methods:
 
     /**
+     * Set Encode Uri
+     *
+     * @param \Closure $encoder
+     *
+     * @return $this
+     */
+    function setEncodeUri(\Closure $encoder);
+
+    /**
+     * Get Encode Uri
+     *
+     * @return \Closure
+     */
+    function getEncodeUri();
+
+    /**
      * Set Path Separator
      *
      * @param string $separator

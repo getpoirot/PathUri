@@ -62,6 +62,13 @@ class HttpUri extends AbstractPathUri
 
         $return = array_merge($parse, $return);
 
+        # filter parts
+        array_walk($return, function(&$item, $key) {
+            $method = '__filter'.\Poirot\Core\sanitize_camelcase($key);
+            if (method_exists($this, $method))
+                $item = call_user_func([$this, $method], $item);
+        });
+
         return $return;
     }
 
@@ -85,7 +92,7 @@ class HttpUri extends AbstractPathUri
      */
     function setScheme($scheme)
     {
-        $scheme = strtolower($scheme);
+        $scheme = $this->__filterScheme($scheme);
 
         if(!empty($scheme) && !isset(self::$SCHEME[$scheme]))
             throw new \InvalidArgumentException(sprintf(
@@ -415,10 +422,8 @@ class HttpUri extends AbstractPathUri
             return rawurlencode($match[0]);
         };
 
-        if ($this->getPath()) {
-            $regex   = '/(?:[^' .'a-zA-Z0-9_\-\.~'. ':@&=\+\$,\/;%]+|%(?![A-Fa-f0-9]{2}))/';
-            $uri .= preg_replace_callback($regex, $replace, $this->getPath()->toString());
-        }
+        if ($this->getPath())
+            $uri .= $this->getPath()->toString();
         elseif ($this->getHost() && (!$this->getQuery()->isEmpty() || $this->getFragment()))
             $uri .= '/';
 
@@ -433,5 +438,28 @@ class HttpUri extends AbstractPathUri
         }
 
         return $uri;
+    }
+
+    function __toString()
+    {
+        return $this->toString();
+    }
+
+
+    // ..
+
+    /**
+     * Filter Scheme
+     *
+     * @param string $scheme
+     *
+     * @return string
+     */
+    protected function __filterScheme($scheme)
+    {
+        $scheme = strtolower($scheme);
+        $scheme = preg_replace('#:(//)?$#', '', $scheme);
+
+        return $scheme;
     }
 }
