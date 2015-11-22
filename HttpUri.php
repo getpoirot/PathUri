@@ -455,11 +455,17 @@ class HttpUri extends AbstractPathUri
      *
      * @return string
      */
-    protected function __filterScheme($scheme)
+    function __filterScheme($scheme)
     {
         $scheme = strtolower($scheme);
         $scheme = preg_replace('#:(//)?$#', '', $scheme);
 
         return $scheme;
+    }
+
+    function __clone()
+    {
+        $this->query = clone $this->query;
+        $this->path  = clone $this->path;
     }
 }

@@ -16,7 +16,7 @@ abstract class AbstractPathUri
     /**
      * Create a new URI object
      *
-     * @param  iBasePathUri|string|array $pathUri
+     * @param iBasePathUri|string|array $pathUri
      *
      * @throws \InvalidArgumentException
      */
