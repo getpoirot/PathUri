@@ -117,12 +117,12 @@ class HttpUri extends AbstractPathUri
     {
         $scheme = $this->__filterScheme($scheme);
 
-        if(!empty($scheme) && !isset(self::$SCHEME[$scheme]))
+        /*if(!empty($scheme) && !isset(self::$SCHEME[$scheme]))
             throw new \InvalidArgumentException(sprintf(
                 'Unsupported scheme "%s"; must be any empty string or in the set (%s)'
                 , $scheme
                 , implode(', ', array_keys(self::$SCHEME))
-            ));
+            ));*/
 
         $this->scheme = $scheme;
 
@@ -244,15 +244,28 @@ class HttpUri extends AbstractPathUri
      * - If no port is present, but a scheme is present, this method MAY return
      * the standard port for that scheme, but SHOULD return null
      *
-     * @return int|false
+     * @param bool $preserve
+     *
+     * @return null|int
      */
-    function getPort()
+    function getPort($preserve = false)
     {
         $scheme = $this->getScheme();
-        if (!$scheme || ($this->port === self::$SCHEME[$scheme]))
-            return null;
+        if (!$scheme)
+            return $this->port;
 
-        return $this->port;
+        if ($this->port === null && $preserve)
+            if (array_key_exists($scheme, self::$SCHEME))
+                return self::$SCHEME[$scheme];
+
+        return ($this->port)
+            ? (
+                (
+                    array_key_exists($scheme, self::$SCHEME)
+                    && $this->port === self::$SCHEME[$scheme]
+                    && $preserve === false
+                ) ? null : $this->port
+            ) : null;
     }
 
     /**
