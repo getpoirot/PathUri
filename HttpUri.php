@@ -2,9 +2,11 @@
 namespace Poirot\PathUri;
 
 use Poirot\Core\Interfaces\iPoirotEntity;
+use Poirot\PathUri\Interfaces\iBasePathUri;
 use Poirot\PathUri\Interfaces\iHttpUri;
 use Poirot\PathUri\Interfaces\iPQueryEntity;
 use Poirot\PathUri\Interfaces\iSeqPathUri;
+use Poirot\PathUri\Psr\UriInterface;
 use Poirot\PathUri\Query\PQEntity;
 
 class HttpUri extends AbstractPathUri
@@ -25,6 +27,27 @@ class HttpUri extends AbstractPathUri
     protected $path;
     protected $query;
     protected $fragment;
+
+    /**
+     * Build Object From PathUri
+     *
+     * - don't reset this object, so values merged with new one
+     *
+     * note: it take a instance of pathUri object
+     *   same as base object
+     *
+     * @param UriInterface|iHttpUri $path
+     *
+     * @throws \InvalidArgumentException
+     * @return $this
+     */
+    function fromPathUri(/*iPathAbstractUri*/ $path)
+    {
+        if ($path instanceof UriInterface)
+            $path = new HttpUri((string) $path);
+
+        return parent::fromPathUri($path);
+    }
 
     /**
      * Build Object From String
