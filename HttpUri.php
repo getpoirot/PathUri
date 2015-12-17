@@ -501,7 +501,7 @@ class HttpUri extends AbstractPathUri
 
     function __clone()
     {
-        $this->query = clone $this->query;
-        $this->path  = clone $this->path;
+        (!$this->query) ?: $this->query = clone $this->query;
+        (!$this->query) ?: $this->path  = clone $this->path;
     }
 }
