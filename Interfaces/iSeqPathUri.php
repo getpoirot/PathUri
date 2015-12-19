@@ -123,17 +123,17 @@ interface iSeqPathUri extends iBasePathUri
      *
      * toggle:
      * /var/www/html <=> /var/www/     ===> /html
+     * /uri          <=> contact       ===> /uri
+     * /uri          <=> /contact      ===> contact
      *
      * toggle false:
      * /var/www/     <=> /var/www/html ===> ''
      *
-     * - manipulate current path
-     *
      * @param iSeqPathUri $pathUri
-     * @param bool           $toggle  with toggle always bigger path
-     *                                compared to little one
+     * @param bool        $toggle  with toggle always bigger path
+     *                             compared to little one
      *
-     * @return $this
+     * @return iSeqPathUri
      */
     function mask($pathUri, $toggle = true);
 
@@ -142,12 +142,10 @@ interface iSeqPathUri extends iBasePathUri
      *
      * /var/www/html <=> /var/www/ ===> /var/www
      *
-     * - manipulate current path
-     *
      * @param iSeqPathUri $pathUri
+     * @param bool        $toggle
      *
-     * @param bool $toggle
-     * @return $this
+     * @return iSeqPathUri
      */
     function joint($pathUri, $toggle = true);
 }

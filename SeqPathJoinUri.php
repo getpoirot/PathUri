@@ -375,6 +375,8 @@ class SeqPathJoinUri extends AbstractPathUri
      *
      * toggle:
      * /var/www/html <=> /var/www/     ===> /html
+     * /uri          <=> contact       ===> /uri
+     * /uri          <=> /contact      ===> contact
      *
      * toggle false:
      * /var/www/     <=> /var/www/html ===> ''
@@ -385,7 +387,7 @@ class SeqPathJoinUri extends AbstractPathUri
      * @param bool           $toggle  with toggle always bigger path
      *                                compared to little one
      *
-     * @return $this
+     * @return iSeqPathUri
      */
     function mask($pathUri, $toggle = true)
     {
@@ -405,8 +407,9 @@ class SeqPathJoinUri extends AbstractPathUri
             unset($masked[$i]);
         }
 
-        $this->setPath($masked);
-        return $this;
+        $path = clone $this;
+        $path->setPath($masked);
+        return $path;
     }
 
     /**
@@ -419,7 +422,7 @@ class SeqPathJoinUri extends AbstractPathUri
      * @param iSeqPathUri $pathUri
      *
      * @param bool $toggle
-     * @return $this
+     * @return iSeqPathUri
      */
     function joint($pathUri, $toggle = true)
     {
@@ -439,22 +442,9 @@ class SeqPathJoinUri extends AbstractPathUri
             $similar[] = $v;
         }
 
-        $this->setPath($similar);
-        return $this;
-    }
-
-    /**
-     * Get Uri Depth
-     *
-     * note: in case of /var/www/html
-     *       0:/, 1:var, 2:www ...
-     *       depth is 3
-     *
-     * @return int
-     */
-    function getDepth()
-    {
-        return count($this->_path);
+        $path = clone $this;
+        $path->setPath($similar);
+        return $path;
     }
 
     /**
@@ -475,8 +465,23 @@ class SeqPathJoinUri extends AbstractPathUri
     function split($start, $length = null)
     {
         $path = array_slice($this->_path, $start, $length);
-        $path = new self(['path' => $path]);
+        $return = clone $this;
+        $return->setPath($path);
 
         return $path;
+    }
+
+    /**
+     * Get Uri Depth
+     *
+     * note: in case of /var/www/html
+     *       0:/, 1:var, 2:www ...
+     *       depth is 3
+     *
+     * @return int
+     */
+    function getDepth()
+    {
+        return count($this->_path);
     }
 }
