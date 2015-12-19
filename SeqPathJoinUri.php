@@ -406,14 +406,13 @@ class SeqPathJoinUri extends AbstractPathUri
         }
 
         $this->setPath($masked);
-
         return $this;
     }
 
     /**
      * Joint Given PathUri with Current Path
      *
-     * /var/www/html <=> /var/www/ ===> /html
+     * /var/www/html <=> /var/www/ ===> /var/www
      *
      * - manipulate current path
      *
@@ -441,7 +440,6 @@ class SeqPathJoinUri extends AbstractPathUri
         }
 
         $this->setPath($similar);
-
         return $this;
     }
 
