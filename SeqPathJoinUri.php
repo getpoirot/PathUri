@@ -66,14 +66,13 @@ class SeqPathJoinUri extends AbstractPathUri
 
         $DS = $this->getSeparator();
 
-        // remove last trailing "/"
-        $pathStr = Util::normalizeUnixPath($pathStr, $DS);
+        ## dont remove trailing slash, have useful in paths
+        $pathStr = Util::normalizeUnixPath($pathStr, $DS, false);
         if ($pathStr === $this->getSeparator())
-            // in case of "/", explode create unwanted ['', '']
-            // so i`ve check path string for decision
+            ## in case of "/"
             $path = [ $DS, ];
         elseif ($pathStr === '')
-            // Current Directory
+            ## Current Directory
             $path = [];
         else {
             $path = $this->__normalize(explode($DS, $pathStr));
@@ -224,12 +223,11 @@ class SeqPathJoinUri extends AbstractPathUri
         // add empty slashes after all
         // that implode work properly for
         // paths with one member
-        // its removed by normalize at last
         $path[] = '';
         $return = implode( $this->getSeparator(), $this->_path );
         $return = $this->getEncodeUri()->__invoke($return);
 
-        return Util::normalizeUnixPath($return, $this->getSeparator());
+        return Util::normalizeUnixPath($return, $this->getSeparator(), false);
     }
 
     /**
@@ -284,7 +282,10 @@ class SeqPathJoinUri extends AbstractPathUri
         // Cleanup empty directories ".", "//":
         reset($paths); $i = 0; $indexes = [];
         while(($val = current($paths)) !== false) {
-            if (($val == $this->getSeparator() || $val === '' || $val === '.') && $i > 0)
+            if (
+                ($val == $this->getSeparator() || $val === '' || $val === '.')
+                && ($i > 0 && ($i < count($paths) -1 || $val === '.') /* get last one slash */)
+            )
                 $indexes[] = key($paths);
 
             $i++;
@@ -293,7 +294,6 @@ class SeqPathJoinUri extends AbstractPathUri
 
         foreach($indexes as $i)
             unset($paths[$i]);
-
 
         // Normalize go up to parent "..":
         reset($paths); $prevIndex = null;
