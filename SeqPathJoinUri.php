@@ -468,7 +468,7 @@ class SeqPathJoinUri extends AbstractPathUri
         $return = clone $this;
         $return->setPath($path);
 
-        return $path;
+        return $return;
     }
 
     /**
