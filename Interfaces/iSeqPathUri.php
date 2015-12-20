@@ -101,22 +101,36 @@ interface iSeqPathUri extends iBasePathUri
      *
      * - manipulate current path
      *
-     * @param iBasePathUri $pathUri
+     * @param iSeqPathUri $pathUri
      *
      * @return $this
      */
-    function append($pathUri);
+    function append(iSeqPathUri $pathUri);
 
     /**
      * Prepend Path
      *
      * - manipulate current path
      *
-     * @param iBasePathUri $pathUri
+     * @param iSeqPathUri $pathUri
      *
      * @return $this
      */
-    function prepend($pathUri);
+    function prepend(iSeqPathUri $pathUri);
+
+    /**
+     * Merge paths
+     *
+     * .     <=> /bar ----> /bar
+     * /foo  <=> /bar ----> /bar
+     * /foo  <=> bar  ----> /bar
+     * /foo/ <=> bar  ----> /foo/bar
+     *
+     * @param iSeqPathUri $pathUri
+     *
+     * @return iSeqPathUri
+     */
+    function merge(iSeqPathUri $pathUri);
 
     /**
      * Mask Given PathUri with Current Path
@@ -135,7 +149,7 @@ interface iSeqPathUri extends iBasePathUri
      *
      * @return iSeqPathUri
      */
-    function mask($pathUri, $toggle = true);
+    function mask(iSeqPathUri $pathUri, $toggle = true);
 
     /**
      * Joint Given PathUri with Current Path
@@ -147,5 +161,5 @@ interface iSeqPathUri extends iBasePathUri
      *
      * @return iSeqPathUri
      */
-    function joint($pathUri, $toggle = true);
+    function joint(iSeqPathUri $pathUri, $toggle = true);
 }

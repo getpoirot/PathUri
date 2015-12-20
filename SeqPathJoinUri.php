@@ -330,23 +330,25 @@ class SeqPathJoinUri extends AbstractPathUri
      *
      * - manipulate current path
      *
-     * @param iBasePathUri $pathUri
+     * @param iSeqPathUri $pathUri
      *
      * @return $this
      */
-    function append($pathUri)
+    function append(iSeqPathUri $pathUri)
     {
         /** @var iBasePathUri $pathUri */
         $appendPath = $pathUri->toArray()['path'];
-        $appendPath = array_filter($appendPath, function($p) {
-            // Remove all ['',] from path
-            // on appended path we don't want any absolute sign in
-            // array list
-            return $p !== $this->getSeparator();
-        });
+
+        if ($this->isAbsolute()) {
+            $appendPath = array_filter($appendPath, function($p) {
+                // Remove all ['',] from path
+                // on appended path we don't want any absolute sign in
+                // array list
+                return $p !== $this->getSeparator();
+            });
+        }
 
         $finalPath = array_merge($this->_path, $appendPath);
-
         $this->setPath($finalPath);
 
         return $this;
@@ -357,17 +359,48 @@ class SeqPathJoinUri extends AbstractPathUri
      *
      * - manipulate current path
      *
-     * @param iBasePathUri $pathUri
+     * @param iSeqPathUri $pathUri
      *
      * @return $this
      */
-    function prepend($pathUri)
+    function prepend(iSeqPathUri $pathUri)
     {
         /** @var iBasePathUri $pathUri */
         $finalPath = array_merge($pathUri->toArray()['path'], $this->_path);
         $this->setPath($finalPath);
 
         return $this;
+    }
+
+    /**
+     * Merge paths
+     *
+     * .     <=> /bar ----> /bar
+     * /foo  <=> /bar ----> /bar
+     *
+     * /foo  <=> bar  ----> /bar
+     * /foo/ <=> bar  ----> /foo/bar
+     *
+     * @param iSeqPathUri $pathUri
+     *
+     * @return iSeqPathUri
+     */
+    function merge(iSeqPathUri $pathUri)
+    {
+        $return = clone $this;
+
+        if ($pathUri->isAbsolute()) {
+            ## /bar
+            $return = $return->joint($pathUri)->append($pathUri);
+        } else {
+            ## bar
+            $return = $return->mask($pathUri)
+                ->split(0, -1)
+                ->append($pathUri)
+            ;
+        }
+
+        return $return;
     }
 
     /**
@@ -381,16 +414,24 @@ class SeqPathJoinUri extends AbstractPathUri
      * toggle false:
      * /var/www/     <=> /var/www/html ===> ''
      *
-     * - manipulate current path
-     *
      * @param iSeqPathUri $pathUri
      * @param bool           $toggle  with toggle always bigger path
      *                                compared to little one
      *
      * @return iSeqPathUri
      */
-    function mask($pathUri, $toggle = true)
+    function mask(iSeqPathUri $pathUri, $toggle = true)
     {
+        if (
+            $this->isAbsolute() || $pathUri->isAbsolute()
+            && !($this->isAbsolute() && $pathUri->isAbsolute())
+        )
+            ## the absolute path when another is not is always masked on
+            ## /foo <=> bar ---> /foo
+            return clone (($this->isAbsolute()) ? $this : $pathUri);
+
+        // ...
+
         $muchLength = $this->_path;
         $less       = $pathUri->toArray()['path'];
 
@@ -417,14 +458,12 @@ class SeqPathJoinUri extends AbstractPathUri
      *
      * /var/www/html <=> /var/www/ ===> /var/www
      *
-     * - manipulate current path
-     *
      * @param iSeqPathUri $pathUri
      *
      * @param bool $toggle
      * @return iSeqPathUri
      */
-    function joint($pathUri, $toggle = true)
+    function joint(iSeqPathUri $pathUri, $toggle = true)
     {
         $muchLength = $this->_path;
         $less       = $pathUri->toArray()['path'];
