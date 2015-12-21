@@ -423,7 +423,7 @@ class SeqPathJoinUri extends AbstractPathUri
     function mask(iSeqPathUri $pathUri, $toggle = true)
     {
         if (
-            $this->isAbsolute() || $pathUri->isAbsolute()
+            ($this->isAbsolute() || $pathUri->isAbsolute())
             && !($this->isAbsolute() && $pathUri->isAbsolute())
         )
             ## the absolute path when another is not is always masked on
