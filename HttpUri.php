@@ -326,6 +326,9 @@ class HttpUri extends AbstractPathUri
     /**
      * Set the query
      *
+     * $resource when using as string
+     * first=value&arr[]=foo+bar&arr[]=baz
+     *
      * @param string|array|iPoirotEntity $query
      *
      * @return $this

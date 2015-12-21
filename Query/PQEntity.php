@@ -14,9 +14,12 @@ class PQEntity extends Entity
      *
      * Set Properties
      *
-     * - You can implement this method on subclasses
+     * $resource when using as string
+     * first=value&arr[]=foo+bar&arr[]=baz
      *
-     * @param EntityInterface $resource
+     * ! you can implement this method on subclasses
+     *
+     * @param EntityInterface|string $resource
      *
      * @throws \InvalidArgumentException
      * @return array
