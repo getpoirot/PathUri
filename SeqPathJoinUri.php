@@ -391,7 +391,7 @@ class SeqPathJoinUri extends AbstractPathUri
 
         if ($pathUri->isAbsolute()) {
             ## /bar
-            $return = $return->joint($pathUri)->append($pathUri);
+            $return = $return->joint($pathUri)->append($return->mask($pathUri));
         } else {
             ## bar
             $return = $return->mask($pathUri)
@@ -428,7 +428,11 @@ class SeqPathJoinUri extends AbstractPathUri
         )
             ## the absolute path when another is not is always masked on
             ## /foo <=> bar ---> /foo
-            return clone (($this->isAbsolute()) ? $this : $pathUri);
+            return clone (
+                ($this->isAbsolute())
+                    ? ((/* must not same */ $this->toString() === $pathUri->toString()) ? new SeqPathJoinUri() : $this)
+                    : $pathUri
+            );
 
         // ...
 
