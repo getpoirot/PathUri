@@ -2,7 +2,6 @@
 namespace Poirot\PathUri;
 
 use Poirot\Core\Interfaces\iPoirotEntity;
-use Poirot\PathUri\Interfaces\iBasePathUri;
 use Poirot\PathUri\Interfaces\iHttpUri;
 use Poirot\PathUri\Interfaces\iPQueryEntity;
 use Poirot\PathUri\Interfaces\iSeqPathUri;
