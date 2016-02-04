@@ -20,7 +20,8 @@ class Util
         $path = str_replace('\\', $separator, $path);
 
         // remove sequences of slashes
-        $path = preg_replace('#'.$separator.'{2,}#', $separator, $path);
+        ##! has error warning on "/payam"
+        $path = @preg_replace('#'.$separator.'{2,}#', $separator, $path);
 
         //remove trailing slash, /dir[/] not /
         if ($stripTrailingSlash
