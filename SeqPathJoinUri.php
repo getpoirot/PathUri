@@ -1,15 +1,15 @@
 <?php
 namespace Poirot\PathUri;
 
-use Poirot\PathUri\Interfaces\iBasePathUri;
-use Poirot\PathUri\Interfaces\iSeqPathUri;
+use Poirot\PathUri\Interfaces\iUriBase;
+use Poirot\PathUri\Interfaces\iUriSequence;
 
 /**
  * note: string paths usually must be normalized from
  *       the class that used this
  */
-class SeqPathJoinUri extends AbstractPathUri
-    implements iSeqPathUri
+class SeqPathJoinUri extends aUri
+    implements iUriSequence
 {
     // From SetterTrait ... {
     //   used on fromArray, it will first set Separator
@@ -330,13 +330,13 @@ class SeqPathJoinUri extends AbstractPathUri
      *
      * - manipulate current path
      *
-     * @param iSeqPathUri $pathUri
+     * @param iUriSequence $pathUri
      *
      * @return $this
      */
-    function append(iSeqPathUri $pathUri)
+    function append(iUriSequence $pathUri)
     {
-        /** @var iBasePathUri $pathUri */
+        /** @var iUriBase $pathUri */
         $appendPath = $pathUri->toArray()['path'];
 
         if ($this->isAbsolute()) {
@@ -359,13 +359,13 @@ class SeqPathJoinUri extends AbstractPathUri
      *
      * - manipulate current path
      *
-     * @param iSeqPathUri $pathUri
+     * @param iUriSequence $pathUri
      *
      * @return $this
      */
-    function prepend(iSeqPathUri $pathUri)
+    function prepend(iUriSequence $pathUri)
     {
-        /** @var iBasePathUri $pathUri */
+        /** @var iUriBase $pathUri */
         $finalPath = array_merge($pathUri->toArray()['path'], $this->_path);
         $this->setPath($finalPath);
 
@@ -381,11 +381,11 @@ class SeqPathJoinUri extends AbstractPathUri
      * /foo  <=> bar  ----> /bar
      * /foo/ <=> bar  ----> /foo/bar
      *
-     * @param iSeqPathUri $pathUri
+     * @param iUriSequence $pathUri
      *
-     * @return iSeqPathUri
+     * @return iUriSequence
      */
-    function merge(iSeqPathUri $pathUri)
+    function merge(iUriSequence $pathUri)
     {
         $return = clone $this;
 
@@ -414,13 +414,13 @@ class SeqPathJoinUri extends AbstractPathUri
      * toggle false:
      * /var/www/     <=> /var/www/html ===> ''
      *
-     * @param iSeqPathUri $pathUri
+     * @param iUriSequence $pathUri
      * @param bool           $toggle  with toggle always bigger path
      *                                compared to little one
      *
-     * @return iSeqPathUri
+     * @return iUriSequence
      */
-    function mask(iSeqPathUri $pathUri, $toggle = true)
+    function mask(iUriSequence $pathUri, $toggle = true)
     {
         if (
             ($this->isAbsolute() || $pathUri->isAbsolute())
@@ -462,12 +462,12 @@ class SeqPathJoinUri extends AbstractPathUri
      *
      * /var/www/html <=> /var/www/ ===> /var/www
      *
-     * @param iSeqPathUri $pathUri
+     * @param iUriSequence $pathUri
      *
      * @param bool $toggle
-     * @return iSeqPathUri
+     * @return iUriSequence
      */
-    function joint(iSeqPathUri $pathUri, $toggle = true)
+    function joint(iUriSequence $pathUri, $toggle = true)
     {
         $muchLength = $this->_path;
         $less       = $pathUri->toArray()['path'];
@@ -503,7 +503,7 @@ class SeqPathJoinUri extends AbstractPathUri
      * @param int      $start
      * @param null|int $length
      *
-     * @return iSeqPathUri
+     * @return iUriSequence
      */
     function split($start, $length = null)
     {

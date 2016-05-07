@@ -15,7 +15,8 @@ namespace Poirot\PathUri\Interfaces;
  *   of the user to handle both "" and "/"
  *
  */
-interface iSeqPathUri extends iBasePathUri
+interface iUriSequence 
+    extends iUriBase
 {
 
     // Parse Getter/Setter Methods:
@@ -92,7 +93,7 @@ interface iSeqPathUri extends iBasePathUri
      * @param int      $start
      * @param null|int $length
      *
-     * @return iSeqPathUri
+     * @return iUriSequence
      */
     function split($start, $length = null);
 
@@ -101,22 +102,22 @@ interface iSeqPathUri extends iBasePathUri
      *
      * - manipulate current path
      *
-     * @param iSeqPathUri $pathUri
+     * @param iUriSequence $pathUri
      *
      * @return $this
      */
-    function append(iSeqPathUri $pathUri);
+    function append(iUriSequence $pathUri);
 
     /**
      * Prepend Path
      *
      * - manipulate current path
      *
-     * @param iSeqPathUri $pathUri
+     * @param iUriSequence $pathUri
      *
      * @return $this
      */
-    function prepend(iSeqPathUri $pathUri);
+    function prepend(iUriSequence $pathUri);
 
     /**
      * Merge paths
@@ -126,11 +127,11 @@ interface iSeqPathUri extends iBasePathUri
      * /foo  <=> bar  ----> /bar
      * /foo/ <=> bar  ----> /foo/bar
      *
-     * @param iSeqPathUri $pathUri
+     * @param iUriSequence $pathUri
      *
-     * @return iSeqPathUri
+     * @return iUriSequence
      */
-    function merge(iSeqPathUri $pathUri);
+    function merge(iUriSequence $pathUri);
 
     /**
      * Mask Given PathUri with Current Path
@@ -143,23 +144,23 @@ interface iSeqPathUri extends iBasePathUri
      * toggle false:
      * /var/www/     <=> /var/www/html ===> ''
      *
-     * @param iSeqPathUri $pathUri
+     * @param iUriSequence $pathUri
      * @param bool        $toggle  with toggle always bigger path
      *                             compared to little one
      *
-     * @return iSeqPathUri
+     * @return iUriSequence
      */
-    function mask(iSeqPathUri $pathUri, $toggle = true);
+    function mask(iUriSequence $pathUri, $toggle = true);
 
     /**
      * Joint Given PathUri with Current Path
      *
      * /var/www/html <=> /var/www/ ===> /var/www
      *
-     * @param iSeqPathUri $pathUri
+     * @param iUriSequence $pathUri
      * @param bool        $toggle
      *
-     * @return iSeqPathUri
+     * @return iUriSequence
      */
-    function joint(iSeqPathUri $pathUri, $toggle = true);
+    function joint(iUriSequence $pathUri, $toggle = true);
 }

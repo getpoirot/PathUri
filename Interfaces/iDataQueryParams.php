@@ -1,9 +1,10 @@
 <?php
 namespace Poirot\PathUri\Interfaces;
 
-use Poirot\Core\Interfaces\iPoirotEntity;
+use Poirot\Std\Interfaces\Struct\iData;
 
-interface iPQueryEntity extends iPoirotEntity
+interface iDataQueryParams 
+    extends iData
 {
     /**
      * Represent query string from attributes

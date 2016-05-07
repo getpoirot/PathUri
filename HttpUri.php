@@ -2,14 +2,14 @@
 namespace Poirot\PathUri;
 
 use Poirot\Core\Interfaces\iPoirotEntity;
-use Poirot\PathUri\Interfaces\iHttpUri;
-use Poirot\PathUri\Interfaces\iPQueryEntity;
-use Poirot\PathUri\Interfaces\iSeqPathUri;
+use Poirot\PathUri\Interfaces\iUriHttp;
+use Poirot\PathUri\Interfaces\iDataQueryParams;
+use Poirot\PathUri\Interfaces\iUriSequence;
 use Poirot\PathUri\Psr\UriInterface;
-use Poirot\PathUri\Query\PQEntity;
+use Poirot\PathUri\Query\DataQueryParams;
 
-class HttpUri extends AbstractPathUri
-    implements iHttpUri
+class HttpUri extends aUri
+    implements iUriHttp
 {
     static $SCHEME = [
         'http'  => 80,
@@ -35,7 +35,7 @@ class HttpUri extends AbstractPathUri
      * note: it take a instance of pathUri object
      *   same as base object
      *
-     * @param UriInterface|iHttpUri $path
+     * @param UriInterface|iUriHttp $path
      *
      * @throws \InvalidArgumentException
      * @return $this
@@ -114,7 +114,7 @@ class HttpUri extends AbstractPathUri
      */
     function setScheme($scheme)
     {
-        $scheme = $this->__filterScheme($scheme);
+        $scheme = $this->_filterScheme($scheme);
 
         /*if(!empty($scheme) && !isset(self::$SCHEME[$scheme]))
             throw new \InvalidArgumentException(sprintf(
@@ -281,7 +281,7 @@ class HttpUri extends AbstractPathUri
      * delimiter between path segments, that value MUST be passed in encoded
      * form (e.g., "%2F") to the instance.
      *
-     * @param string|iSeqPathUri $path
+     * @param string|iUriSequence $path
      *
      * @return $this
      */
@@ -290,7 +290,7 @@ class HttpUri extends AbstractPathUri
         if (is_string($path))
             $path = new SeqPathJoinUri($path);
 
-        if (!$path instanceof iSeqPathUri)
+        if (!$path instanceof iUriSequence)
             throw new \InvalidArgumentException(sprintf(
                 'Path must be uri string or instance of iSeqPathUri, "%s" given instead.'
                 , is_object($path) ? get_class($path) : gettype($path)
@@ -316,7 +316,7 @@ class HttpUri extends AbstractPathUri
     /**
      * Get the URI path
      *
-     * @return iSeqPathUri
+     * @return iUriSequence
      */
     function getPath()
     {
@@ -346,12 +346,12 @@ class HttpUri extends AbstractPathUri
      * - entity setFrom query string,
      * - later: set query string as resource on entity object
      *
-     * @return iPQueryEntity
+     * @return iDataQueryParams
      */
     function getQuery()
     {
         if (!$this->query)
-            $this->query = new PQEntity;
+            $this->query = new DataQueryParams;
 
         return $this->query;
     }
@@ -493,7 +493,7 @@ class HttpUri extends AbstractPathUri
      *
      * @return string
      */
-    function __filterScheme($scheme)
+    function _filterScheme($scheme)
     {
         $scheme = strtolower($scheme);
         $scheme = preg_replace('#:(//)?$#', '', $scheme);

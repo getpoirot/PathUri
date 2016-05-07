@@ -1,20 +1,20 @@
 <?php
 namespace Poirot\PathUri;
 
-use Poirot\PathUri\Interfaces\iFilePathUri;
-use Poirot\PathUri\Interfaces\iSeqPathUri;
+use Poirot\PathUri\Interfaces\iUriFilePath;
+use Poirot\PathUri\Interfaces\iUriSequence;
 
 class FilePathUri extends SeqPathJoinUri
-    implements iFilePathUri
+    implements iUriFilePath
 {
     protected $pathSep = '/';
 
     /**
-     * @var iSeqPathUri
+     * @var iUriSequence
      */
     protected $basepath;
     /**
-     * @var iSeqPathUri
+     * @var iUriSequence
      */
     protected $path;
     protected $basename;
@@ -208,7 +208,7 @@ class FilePathUri extends SeqPathJoinUri
      *   and it can be changed by setPathStrMode
      *   later
      *
-     * @param iSeqPathUri|string|null $pathUri
+     * @param iUriSequence|string|null $pathUri
      *
      * @throws \InvalidArgumentException
      * @return $this
@@ -225,7 +225,7 @@ class FilePathUri extends SeqPathJoinUri
                 'path'      => $pathUri,
                 'separator' => $this->getSeparator()
             ]);
-        elseif ($pathUri instanceof iSeqPathUri)
+        elseif ($pathUri instanceof iUriSequence)
             $pathUri->setSeparator($this->getSeparator());
         else
             throw new \InvalidArgumentException(sprintf(
@@ -246,7 +246,7 @@ class FilePathUri extends SeqPathJoinUri
      * - override path separator from this class
      * - create new empty path instance if not set
      *
-     * @return iSeqPathUri
+     * @return iUriSequence
      */
     function getBasepath()
     {
@@ -346,7 +346,7 @@ class FilePathUri extends SeqPathJoinUri
     /**
      * Set Path To File/Directory
      *
-     * @param iSeqPathUri|string $pathUri
+     * @param iUriSequence|string $pathUri
      *
      * @return $this
      */
@@ -362,7 +362,7 @@ class FilePathUri extends SeqPathJoinUri
                 'path'      => $pathUri,
                 'separator' => $this->getSeparator()
             ]);
-        elseif ($pathUri instanceof iSeqPathUri)
+        elseif ($pathUri instanceof iUriSequence)
             $pathUri->setSeparator($this->getSeparator());
         else
             throw new \InvalidArgumentException(sprintf(
@@ -383,7 +383,7 @@ class FilePathUri extends SeqPathJoinUri
      * - override path separator from this class
      * - create new empty path instance if not set
      *
-     * @return iSeqPathUri
+     * @return iUriSequence
      */
     function getPath()
     {

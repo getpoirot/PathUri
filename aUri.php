@@ -1,11 +1,10 @@
 <?php
 namespace Poirot\PathUri;
 
-use Poirot\Core\BuilderSetterTrait;
-use Poirot\PathUri\Interfaces\iBasePathUri;
+use Poirot\PathUri\Interfaces\iUriBase;
 
-abstract class AbstractPathUri
-    implements iBasePathUri
+abstract class aUri
+    implements iUriBase
 {
     use BuilderSetterTrait {
         setupFromArray as protected __fromArray;
@@ -16,7 +15,7 @@ abstract class AbstractPathUri
     /**
      * Create a new URI object
      *
-     * @param iBasePathUri|string|array $pathUri
+     * @param iUriBase|string|array $pathUri
      *
      * @throws \InvalidArgumentException
      */
@@ -29,7 +28,7 @@ abstract class AbstractPathUri
     /**
      * Set From Resource
      *
-     * @param  iBasePathUri|string|array $pathUri
+     * @param  iUriBase|string|array $pathUri
      *
      * @throws \InvalidArgumentException
      * @return $this
@@ -58,7 +57,7 @@ abstract class AbstractPathUri
      * note: it take a instance of pathUri object
      *   same as base object
      *
-     * @param iBasePathUri $path
+     * @param iUriBase $path
      *
      * @throws \InvalidArgumentException
      * @return $this

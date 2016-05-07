@@ -1,24 +1,26 @@
 <?php
 namespace Poirot\PathUri\Psr;
 
-use Poirot\PathUri\Interfaces\iBasePathUri;
+use Poirot\PathUri\HttpUri;
+use Poirot\PathUri\Interfaces\iUriBase;
 
-class HttpUri implements UriInterface
+class PsrUriHttp 
+    implements UriInterface
 {
-    /** @var \Poirot\PathUri\HttpUri */
+    /** @var HttpUri */
     protected $httpUri;
 
     /**
      * Construct
      *
-     * @param iBasePathUri|string|array $uri
+     * @param iUriBase|string|array $uri
      */
     function __construct($uri)
     {
-        if ($uri instanceof \Poirot\PathUri\HttpUri)
+        if ($uri instanceof HttpUri)
             $this->httpUri = $uri;
         else
-            $this->httpUri = new \Poirot\PathUri\HttpUri($uri);
+            $this->httpUri = new HttpUri($uri);
     }
 
     /**
@@ -252,7 +254,7 @@ class HttpUri implements UriInterface
      */
     function withScheme($scheme)
     {
-        $scheme = $this->httpUri->__filterScheme($scheme);
+        $scheme = $this->httpUri->_filterScheme($scheme);
         if ($scheme === $this->getScheme())
             return $this;
 

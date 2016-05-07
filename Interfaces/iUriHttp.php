@@ -1,9 +1,8 @@
 <?php
 namespace Poirot\PathUri\Interfaces;
 
-use Poirot\Core\Interfaces\iPoirotEntity;
-
-interface iHttpUri extends iBasePathUri
+interface iUriHttp 
+    extends iUriBase
 {
     // Parse Getter/Setter Methods:
 
@@ -119,7 +118,7 @@ interface iHttpUri extends iBasePathUri
      * delimiter between path segments, that value MUST be passed in encoded
      * form (e.g., "%2F") to the instance.
      *
-     * @param string|iSeqPathUri $path
+     * @param string|iUriSequence $path
      *
      * @return $this
      */
@@ -128,14 +127,14 @@ interface iHttpUri extends iBasePathUri
     /**
      * Get the URI path
      *
-     * @return iSeqPathUri
+     * @return iUriSequence
      */
     function getPath();
 
     /**
      * Set the query
      *
-     * @param string|array|iPoirotEntity $query
+     * @param string|array|\Traversable $query
      *
      * @return $this
      */
@@ -147,7 +146,7 @@ interface iHttpUri extends iBasePathUri
      * - entity setFrom query string,
      * - later: set query string as resource on entity object
      *
-     * @return iPQueryEntity
+     * @return iDataQueryParams
      */
     function getQuery();
 

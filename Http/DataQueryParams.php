@@ -1,13 +1,12 @@
 <?php
-namespace Poirot\PathUri\Query;
+namespace Poirot\PathUri\Http;
 
-use Poirot\Core\Entity;
-use Poirot\Core\Interfaces\EntityInterface;
-use Poirot\Core\Interfaces\iPoirotEntity;
-use Poirot\PathUri\Interfaces\iPQueryEntity;
+use Poirot\PathUri\Interfaces\iDataQueryParams;
+use Poirot\Std\Struct\DataEntity;
 
-class PQEntity extends Entity
-    implements iPQueryEntity
+class DataQueryParams 
+    extends DataEntity
+    implements iDataQueryParams
 {
     /**
      * @override
