@@ -9,7 +9,7 @@
         }
     ],
     "require": {
-        "poirot/core": "dev-master"
+        "poirot/std": "dev-devel"
     },
     "target-dir": "Poirot/PathUri",
     "autoload"  : {
@@ -17,4 +17,7 @@
             "Poirot\\PathUri": "."
         }
     }
+    ,"repositories": [
+       { "type": "git" ,"url": "https://github.com/phPoirot/Std.git" }
+    ]
 }
