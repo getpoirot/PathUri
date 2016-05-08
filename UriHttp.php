@@ -1,14 +1,13 @@
 <?php
 namespace Poirot\PathUri;
 
-use Poirot\Core\Interfaces\iPoirotEntity;
 use Poirot\PathUri\Interfaces\iUriHttp;
 use Poirot\PathUri\Interfaces\iDataQueryParams;
 use Poirot\PathUri\Interfaces\iUriSequence;
 use Poirot\PathUri\Psr\UriInterface;
-use Poirot\PathUri\Query\DataQueryParams;
 
-class HttpUri extends aUri
+class UriHttp
+    extends aUri
     implements iUriHttp
 {
     static $SCHEME = [
@@ -43,7 +42,7 @@ class HttpUri extends aUri
     function fromPathUri(/*iPathAbstractUri*/ $path)
     {
         if ($path instanceof UriInterface)
-            $path = new HttpUri((string) $path);
+            $path = new UriHttp((string) $path);
 
         return parent::fromPathUri($path);
     }
@@ -288,7 +287,7 @@ class HttpUri extends aUri
     function setPath($path)
     {
         if (is_string($path))
-            $path = new SeqPathJoinUri($path);
+            $path = new UriSequence($path);
 
         if (!$path instanceof iUriSequence)
             throw new \InvalidArgumentException(sprintf(
@@ -477,12 +476,7 @@ class HttpUri extends aUri
 
         return $uri;
     }
-
-    function __toString()
-    {
-        return $this->toString();
-    }
-
+    
 
     // ..
 
@@ -505,5 +499,15 @@ class HttpUri extends aUri
     {
         (!$this->query) ?: $this->query = clone $this->query;
         (!$this->path)  ?: $this->path  = clone $this->path;
+    }
+
+    /**
+     * Parse path string to parts in associateArray
+     * @param string $stringPath
+     * @return mixed
+     */
+    function doParseFromString($stringPath)
+    {
+        // TODO: Implement doParseFromString() method.
     }
 }

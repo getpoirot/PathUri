@@ -4,27 +4,26 @@ namespace Poirot\PathUri;
 use Poirot\PathUri\Interfaces\iUriFilePath;
 use Poirot\PathUri\Interfaces\iUriSequence;
 
-class FilePathUri extends SeqPathJoinUri
+class UriFilePath
+    extends UriSequence
     implements iUriFilePath
 {
     protected $pathSep = '/';
 
-    /**
-     * @var iUriSequence
-     */
-    protected $basepath;
-    /**
-     * @var iUriSequence
-     */
-    protected $path;
     protected $basename;
     protected $extension;
+    
+    /** @var iUriSequence */
+    protected $basepath;
+    /** @var iUriSequence */
+    protected $path;
+    
 
     /**
      * always default is relative
      *
      * @see getPathStrMode
-     * @see setBasepath
+     * @see setBasePath
      *
      * @var string
      */
@@ -34,60 +33,42 @@ class FilePathUri extends SeqPathJoinUri
 
     protected $normalize = false;
 
-    /**
-     * Set Path Separator
-     *
-     * @param string $sep
-     *
-     * @return $this
-     */
-    function setSeparator($sep)
-    {
-        $this->pathSep = (string) $sep;
 
-        return $this;
+    /**
+     * SeqPathJoinUri constructor.
+     * @param array $setter
+     */
+    function __construct(array $setter = null)
+    {
+        $this->putBuildPriority(array(
+            ## first set separator that is necessary for other process 
+            'separator'
+        ));
+
+        parent::__construct($setter);
     }
 
     /**
-     * Get Path Separator
+     * Parse path string to parts in associateArray
      *
-     * @return string
+     * @param string $stringPath
+     *
+     * @return mixed
      */
-    function getSeparator()
+    function doParseFromString($stringPath)
     {
-        return $this->pathSep;
-    }
-
-    /**
-     * Build Object From String
-     *
-     * - parse string to associateArray setter
-     * - return value of this method must can be
-     *   used as an argument for fromArray
-     *
-     * @param string $pathStr
-     *
-     * @throws \InvalidArgumentException
-     * @return array
-     */
-    function parse($pathStr)
-    {
-        if (!is_string($pathStr))
-            throw new \InvalidArgumentException(sprintf(
-                'PathStr must be string but "%s" given.'
-                , is_object($pathStr) ? get_class($pathStr) : gettype($pathStr)
-            ));
-
-
-        $path = $this->normalizePathStr($pathStr);
-
+        $path = UTUri::normalizeUnixPath(
+            (string) $stringPath
+            , $this->getSeparator()
+            , false
+        );
+        
         // check the given path has file info .. {
-        $pathJoin = new SeqPathJoinUri([
-            'path'      => $path,
-            'separator' => $this->getSeparator(),
-        ]);
+        $pathJoin = new UriSequence();
+        $pathJoin->setSeparator($this->getSeparator());
+        $pathJoin->setPathSequence($path);
 
-        $tmpPath = $pathJoin->toArray()['path'];
+        $tmpPath = $pathJoin->getPathSequence();
         if (end($tmpPath) == '..') {
             // we have not filename
             $ret['path'] = $pathJoin;
@@ -114,13 +95,12 @@ class FilePathUri extends SeqPathJoinUri
                 unset($ret['path']);
             else
                 // build pathJoin object
-                $ret['path'] = $pathJoin->fromArray([
-                    'path' => $ret['path']
-                ]);
+                $ret['path'] = $pathJoin->setPathSequence($ret['path']);
         }
 
         return $ret;
     }
+
 
     /**
      * Is Absolute Path?
@@ -132,12 +112,40 @@ class FilePathUri extends SeqPathJoinUri
         if ($this->getPathStrMode() == self::PATH_AS_ABSOLUTE)
             return true;
 
-        $filePath = clone $this->getPath();
+        $filePath = clone $this->getPathSequence();
         $path = $filePath->normalize()
-            ->toArray()['path'];
+            ->getPathSequence();
 
         return (isset($path[0]) && $path[0] == $this->getSeparator());
     }
+    
+    
+    // Options:
+
+    /**
+     * Set Path Separator
+     *
+     * @param string $sep
+     *
+     * @return $this
+     */
+    function setSeparator($sep)
+    {
+        $this->pathSep = (string) $sep;
+        return $this;
+    }
+
+    /**
+     * Get Path Separator
+     *
+     * @return string
+     */
+    function getSeparator()
+    {
+        return $this->pathSep;
+    }
+
+
 
     /**
      * Get Array In Form Of PathInfo
@@ -154,13 +162,13 @@ class FilePathUri extends SeqPathJoinUri
      */
     function toArray()
     {
-        return [
-            'basepath'  => $this->getBasepath(),
-            'path'      => $this->getPath(),
+        return array(
+            'basepath'  => $this->getBasePath(),
+            'path'      => $this->getPathSequence(),
             'basename'  => $this->getBasename(),
             'extension' => $this->getExtension(),
             'filename'  => $this->getFilename(),
-        ];
+        );
     }
 
     /**
@@ -172,7 +180,7 @@ class FilePathUri extends SeqPathJoinUri
      */
     function toString()
     {
-        $finalPath = clone $this->getPath();
+        $finalPath = clone $this->getPathSequence();
 
         if (!$this->allowOverrideBase && $this->normalize)
             // Normalize Filepath before concat them
@@ -182,7 +190,7 @@ class FilePathUri extends SeqPathJoinUri
             $finalPath->normalize();
 
         if ($this->getPathStrMode() === self::PATH_AS_ABSOLUTE)
-            $finalPath = $finalPath->prepend($this->getBasepath());
+            $finalPath = $finalPath->prepend($this->getBasePath());
 
         if ($this->normalize)
             $finalPath->normalize();
@@ -190,11 +198,13 @@ class FilePathUri extends SeqPathJoinUri
         $finalPath = $finalPath->toString();
 
         // Also sequences slashes removed by normalize
-        $realPathname = $this->normalizePathStr(
+        $realPathname = UTUri::normalizeUnixPath(
             ( ($finalPath) ? ($finalPath.$this->getSeparator()) : '' )
             .$this->getFilename()
+            , $this->getSeparator()
+            , false
         );
-
+        
         return $realPathname;
     }
 
@@ -213,18 +223,18 @@ class FilePathUri extends SeqPathJoinUri
      * @throws \InvalidArgumentException
      * @return $this
      */
-    function setBasepath($pathUri)
+    function setBasePath($pathUri)
     {
         if ($pathUri == null)
-            $pathUri = [];
+            $pathUri = array();
         elseif(is_string($pathUri))
-            $pathUri = Util::normalizeUnixPath($pathUri);
+            $pathUri = UTUri::normalizeUnixPath($pathUri);
 
         if (is_array($pathUri) || is_string($pathUri))
-            $pathUri = new SeqPathJoinUri([
+            $pathUri = new UriSequence(array(
                 'path'      => $pathUri,
                 'separator' => $this->getSeparator()
-            ]);
+            ));
         elseif ($pathUri instanceof iUriSequence)
             $pathUri->setSeparator($this->getSeparator());
         else
@@ -248,10 +258,10 @@ class FilePathUri extends SeqPathJoinUri
      *
      * @return iUriSequence
      */
-    function getBasepath()
+    function getBasePath()
     {
         if (!$this->basepath)
-            $this->basepath = new SeqPathJoinUri(['path' => '']);
+            $this->basepath = new UriSequence(array('path' => ''));
 
         $this->basepath->setSeparator($this->getSeparator());
 
@@ -269,7 +279,7 @@ class FilePathUri extends SeqPathJoinUri
      *
      * @return $this
      */
-    function allowOverrideBasepath($flag = true)
+    function setLeakOverrideBasePath($flag = true)
     {
         $this->allowOverrideBase = (boolean) $flag;
 
@@ -281,7 +291,7 @@ class FilePathUri extends SeqPathJoinUri
      *
      * @return boolean
      */
-    function hasOverrideBasepath()
+    function isAllowOverrideBasePath()
     {
         return $this->allowOverrideBase;
     }
@@ -350,18 +360,18 @@ class FilePathUri extends SeqPathJoinUri
      *
      * @return $this
      */
-    function setPath($pathUri)
+    function setPathSequence($pathUri)
     {
         if ($pathUri == null)
-            $pathUri = [];
+            $pathUri = array();
         elseif(is_string($pathUri))
-            $pathUri = Util::normalizeUnixPath($pathUri);
+            $pathUri = UTUri::normalizeUnixPath($pathUri);
 
         if (is_array($pathUri) || is_string($pathUri))
-            $pathUri = new SeqPathJoinUri([
+            $pathUri = new UriSequence(array(
                 'path'      => $pathUri,
                 'separator' => $this->getSeparator()
-            ]);
+            ));
         elseif ($pathUri instanceof iUriSequence)
             $pathUri->setSeparator($this->getSeparator());
         else
@@ -385,10 +395,10 @@ class FilePathUri extends SeqPathJoinUri
      *
      * @return iUriSequence
      */
-    function getPath()
+    function getPathSequence()
     {
         if (!$this->path)
-            $this->path = new SeqPathJoinUri(['path' => '']);
+            $this->path = new UriSequence(array('path' => ''));
 
         $this->path->setSeparator($this->getSeparator());
 
@@ -451,34 +461,10 @@ class FilePathUri extends SeqPathJoinUri
      *
      * - used by toString method
      *
-     * @return FilePathUri::PATH_AS_RELATIVE | self::PATH_AS_ABSOLUTE
+     * @return UriFilePath::PATH_AS_RELATIVE | self::PATH_AS_ABSOLUTE
      */
     function getPathStrMode()
     {
         return $this->pathMode;
-    }
-
-    // In Methods Usage:
-
-    /**
-     * Fix common problems with a file path
-     *
-     * @param string $path
-     * @param bool   $stripTrailingSlash
-     *
-     * @return string
-     */
-    protected function normalizePathStr($path, $stripTrailingSlash = true)
-    {
-        $separator = $this->getPath()->getSeparator();
-
-        // convert paths to portables one
-        $path = Util::normalizeUnixPath(
-            $path
-            , $separator
-            , $stripTrailingSlash
-        );
-
-        return $path;
     }
 }

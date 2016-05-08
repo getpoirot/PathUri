@@ -1,7 +1,7 @@
 <?php
 namespace Poirot\PathUri;
 
-class Util 
+class UTUri 
 {
     /**
      * Fix common problems with a file path
@@ -33,4 +33,3 @@ class Util
         return $path;
     }
 }
- 

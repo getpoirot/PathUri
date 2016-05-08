@@ -8,7 +8,7 @@ namespace Poirot\PathUri\Interfaces;
  *
  */
 interface iUriFilePath 
-    extends iUriBase
+    extends iUriSequence
 {
     const PATH_AS_ABSOLUTE = 'display.absolute.include.basepath';
     const PATH_AS_RELATIVE = 'display.relative.without.basepath';
@@ -21,13 +21,6 @@ interface iUriFilePath
      * @return $this
      */
     function setSeparator($sep);
-
-    /**
-     * Get Path Separator
-     *
-     * @return string
-     */
-    function getSeparator();
 
     /**
      * Set Base Path
@@ -44,7 +37,7 @@ interface iUriFilePath
      * @throws \InvalidArgumentException
      * @return $this
      */
-    function setBasepath($pathUri);
+    function setBasePath($pathUri);
 
     /**
      * Get Base Path
@@ -54,10 +47,10 @@ interface iUriFilePath
      *
      * @return iUriSequence
      */
-    function getBasepath();
+    function getBasePath();
 
     /**
-     * Set Allow Override Basepath
+     * Set Allow Override BasePath
      *
      * - this will used on method:
      *   @see getRelativePathname
@@ -67,17 +60,14 @@ interface iUriFilePath
      *
      * @return $this
      */
-    function allowOverrideBasepath($flag = true);
+    function setLeakOverrideBasePath($flag = true);
 
     /**
-     * Has Override Basepath?
+     * Is Allow Override BasePath?
      *
      * @return boolean
      */
-    function hasOverrideBasepath();
-
-
-    // File/Dir Methods:
+    function isAllowOverrideBasePath();
 
     /**
      * Set Filename of file or folder
@@ -119,28 +109,7 @@ interface iUriFilePath
      * @return string
      */
     function getExtension();
-
-    /**
-     * Set Path To File/Directory
-     *
-     * @param iUriSequence|string $pathUri
-     *
-     * @return $this
-     */
-    function setPath($pathUri);
-
-    /**
-     * Gets the path without filename
-     *
-     * - override path separator from this class
-     * - create new empty path instance if not set
-     *
-     * @return iUriSequence
-     */
-    function getPath();
-
-    // Helpers:
-
+    
     /**
      * Get Filename Include File Extension
      *
@@ -151,6 +120,7 @@ interface iUriFilePath
      */
     function getFilename();
 
+    
     /**
      * Set Display Full Path Mode
      *

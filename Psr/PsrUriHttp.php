@@ -1,13 +1,13 @@
 <?php
 namespace Poirot\PathUri\Psr;
 
-use Poirot\PathUri\HttpUri;
+use Poirot\PathUri\UriHttp;
 use Poirot\PathUri\Interfaces\iUriBase;
 
 class PsrUriHttp 
     implements UriInterface
 {
-    /** @var HttpUri */
+    /** @var UriHttp */
     protected $httpUri;
 
     /**
@@ -17,10 +17,10 @@ class PsrUriHttp
      */
     function __construct($uri)
     {
-        if ($uri instanceof HttpUri)
+        if ($uri instanceof UriHttp)
             $this->httpUri = $uri;
         else
-            $this->httpUri = new HttpUri($uri);
+            $this->httpUri = new UriHttp($uri);
     }
 
     /**
@@ -370,7 +370,7 @@ class PsrUriHttp
     {
         $path    = (string) $path;
         $pathUri = clone $this->httpUri->getPath();
-        $pathUri->setPath($path);
+        $pathUri->setPathSequence($path);
 
         if ($pathUri->toString() === $this->httpUri->getPath()->toString())
             return $this;

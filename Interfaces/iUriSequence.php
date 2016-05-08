@@ -18,25 +18,6 @@ namespace Poirot\PathUri\Interfaces;
 interface iUriSequence 
     extends iUriBase
 {
-
-    // Parse Getter/Setter Methods:
-
-    /**
-     * Set Encode Uri
-     *
-     * @param \Closure $encoder
-     *
-     * @return $this
-     */
-    function setEncodeUri(\Closure $encoder);
-
-    /**
-     * Get Encode Uri
-     *
-     * @return \Closure
-     */
-    function getEncodeUri();
-
     /**
      * Set Path Separator
      *
@@ -51,12 +32,12 @@ interface iUriSequence
      *
      * ! null is to reset object and mean no path
      *
-     * @param null|string|array $path
+     * @param array|null $path
      *
      * @throws \InvalidArgumentException Uri not valid
      * @return $this
      */
-    function setPath($path);
+    function setPathSequence(array $path = null);
 
     /**
      * Get Uri Path
@@ -65,10 +46,9 @@ interface iUriSequence
      *
      * @return array
      */
-    function getPath();
+    function getPathSequence();
 
-    // Operation Methods:
-
+    
     /**
      * Get Uri Depth
      *
@@ -102,22 +82,22 @@ interface iUriSequence
      *
      * - manipulate current path
      *
-     * @param iUriSequence $pathUri
+     * @param iUriSequence $appendUri
      *
      * @return $this
      */
-    function append(iUriSequence $pathUri);
+    function append(iUriSequence $appendUri);
 
     /**
      * Prepend Path
      *
      * - manipulate current path
      *
-     * @param iUriSequence $pathUri
+     * @param iUriSequence $prependUri
      *
      * @return $this
      */
-    function prepend(iUriSequence $pathUri);
+    function prepend(iUriSequence $prependUri);
 
     /**
      * Merge paths
@@ -163,4 +143,21 @@ interface iUriSequence
      * @return iUriSequence
      */
     function joint(iUriSequence $pathUri, $toggle = true);
+
+
+    /**
+     * Set Encode Uri
+     *
+     * @param \Closure $encoder
+     *
+     * @return $this
+     */
+    function setEncodeUri(\Closure $encoder);
+
+    /**
+     * Get Encode Uri
+     *
+     * @return \Closure
+     */
+    function getEncodeUri();
 }

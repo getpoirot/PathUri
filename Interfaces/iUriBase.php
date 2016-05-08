@@ -16,8 +16,6 @@ interface iUriBase
     /**
      * Is Absolute Path?
      *
-     * - in most cases substr[0]-1 == ":" mean we have on absolute path
-     *
      * @return boolean
      */
     function isAbsolute();

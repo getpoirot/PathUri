@@ -2,113 +2,67 @@
 namespace Poirot\PathUri;
 
 use Poirot\PathUri\Interfaces\iUriBase;
+use Poirot\Std\ConfigurableSetter;
 
 abstract class aUri
+    extends ConfigurableSetter
     implements iUriBase
 {
-    use BuilderSetterTrait {
-        setupFromArray as protected __fromArray;
-    }
-
-    private $__reseting;
-
     /**
-     * Create a new URI object
-     *
-     * @param iUriBase|string|array $pathUri
-     *
-     * @throws \InvalidArgumentException
+     * Parse path string to parts in associateArray
+     * @param string $stringPath
+     * @return mixed
      */
-    function __construct($pathUri = null)
-    {
-        if ($pathUri !== null)
-            $this->from($pathUri);
-    }
-
+    abstract function doParseFromString($stringPath);
+    
     /**
-     * Set From Resource
+     * Build Path From Given Resources
      *
-     * @param  iUriBase|string|array $pathUri
+     * [code:]
+     *   $uri->with($uri::withOf('this://is/path/to/parse'))
+     * [code]
      *
-     * @throws \InvalidArgumentException
-     * @return $this
+     * @param array|mixed $optionsResource
+     * @param array       $_
+     *        usually pass as argument into ::with if self instanced
+     *
+     * @throws \InvalidArgumentException if resource not supported
+     * @return array
      */
-    function from($pathUri)
+    final static function parseWith($optionsResource, array $_ = null)
     {
-        if (is_string($pathUri))
-            $pathUri = $this->parse($pathUri);
-
-        if (is_array($pathUri))
-            $this->fromArray($pathUri);
-        elseif (is_object($pathUri))
-            $this->fromPathUri($pathUri);
-        else
+        if (!static::isConfigurableWith($optionsResource))
             throw new \InvalidArgumentException(sprintf(
-                'PathUri must be instanceof iPathUri, Array or String, given: %s'
-                , is_object($pathUri) ? get_class($pathUri) : gettype($pathUri)
-            ));
-    }
-
-    /**
-     * Build Object From PathUri
-     *
-     * - don't reset this object, so values merged with new one
-     *
-     * note: it take a instance of pathUri object
-     *   same as base object
-     *
-     * @param iUriBase $path
-     *
-     * @throws \InvalidArgumentException
-     * @return $this
-     */
-    function fromPathUri(/*iPathAbstractUri*/ $path)
-    {
-        if (!is_object($path) || ! $path instanceof $this)
-            throw new \InvalidArgumentException(sprintf(
-                'PathUri must be instanceof %s, given: %s'
-                , get_class($this)
-                , is_object($path) ? get_class($path) : gettype($path)
+                'Resource must be an array or string, given: (%s).'
+                , \Poirot\Std\flatten($optionsResource)
             ));
 
-        $this->fromArray($path->toArray());
+        $self = new static;
+        (empty($_)) ?: $self->with($_);
+        
+        if (is_string($optionsResource))
+            $optionsResource = $self->doParseFromString($optionsResource);
 
-        return $this;
+        return $optionsResource;
     }
-
+    
     /**
-     * Build Object From Array
+     * Is Configurable With Given Resource
      *
-     * @param array $arrPath
+     * @param mixed $optionsResource
      *
-     * @throws \InvalidArgumentException
-     * @return $this
+     * @return boolean
      */
-    function fromArray(array $arrPath)
+    static function isConfigurableWith($optionsResource)
     {
-        $this->__fromArray($arrPath);
-
-        return $this;
+        return is_array($optionsResource) || is_string($optionsResource);
     }
-
-    /**
-     * Reset parts
-     *
-     * @return $this
-     */
-    function reset()
+    
+    
+    // ..
+    
+    function __toString()
     {
-        $this->__reseting = true; // recursive fromArray call on reseting
-
-        $arrCp = $this->toArray();
-        foreach($arrCp as $key => &$val)
-            $val = null;
-
-        $this->fromArray($arrCp);
-
-        $this->__reseting = false;
-
-        return $this;
+        return $this->toString();
     }
 }
- 
