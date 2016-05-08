@@ -57,7 +57,7 @@ class UriFilePath
      */
     function doParseFromString($stringPath)
     {
-        $path = UTUri::normalizeUnixPath(
+        $path = _uri::normalizeUnixPath(
             (string) $stringPath
             , $this->getSeparator()
             , false
@@ -198,7 +198,7 @@ class UriFilePath
         $finalPath = $finalPath->toString();
 
         // Also sequences slashes removed by normalize
-        $realPathname = UTUri::normalizeUnixPath(
+        $realPathname = _uri::normalizeUnixPath(
             ( ($finalPath) ? ($finalPath.$this->getSeparator()) : '' )
             .$this->getFilename()
             , $this->getSeparator()
@@ -228,7 +228,7 @@ class UriFilePath
         if ($pathUri == null)
             $pathUri = array();
         elseif(is_string($pathUri))
-            $pathUri = UTUri::normalizeUnixPath($pathUri);
+            $pathUri = _uri::normalizeUnixPath($pathUri);
 
         if (is_array($pathUri) || is_string($pathUri))
             $pathUri = new UriSequence(array(
@@ -365,7 +365,7 @@ class UriFilePath
         if ($pathUri == null)
             $pathUri = array();
         elseif(is_string($pathUri))
-            $pathUri = UTUri::normalizeUnixPath($pathUri);
+            $pathUri = _uri::normalizeUnixPath($pathUri);
 
         if (is_array($pathUri) || is_string($pathUri))
             $pathUri = new UriSequence(array(

@@ -361,7 +361,7 @@ class UriSequence
         $return = implode( $this->getSeparator(), $this->_pathSequence );
         $return = call_user_func($this->getEncodeUri(), $return);
 
-        return UTUri::normalizeUnixPath($return, $this->getSeparator(), false);
+        return _uri::normalizeUnixPath($return, $this->getSeparator(), false);
     }
 
     /**
