@@ -352,7 +352,7 @@ class UriSequence
         $return = implode( $this->getSeparator(), $this->getPath() );
         $return = call_user_func($this->getEncodeUri(), $return);
 
-        return \Poirot\PathUri\normalizeUnixPath($return, $this->getSeparator(), false);
+        return $return;
     }
 
     /**
@@ -373,13 +373,21 @@ class UriSequence
             $home  = explode($this->getSeparator(), str_replace('\\', '/', $this->_getHomeDir()));
             $paths = $paths + $home;
         }
-        
-        $paths = array_filter($paths, function($p) {
+
+        $isRoot = substr($paths[0], -1) === ':';
+        $paths  = array_filter($paths, function($p, $i) use (&$isRoot) {
+            if ($isRoot && $i > 0) {
+                // keep first slash after root if exists
+                // phar://path/to/res
+                $isRoot = false;
+                return true;
+            }
+
             // Remove all ['',] from path
             // on appended path we don't want any absolute sign in
             // array list
             return ($p !== '' && $p !== '.');
-        });
+        }, ARRAY_FILTER_USE_BOTH);
 
         // Collapse ".." with the previous part, if one exists
         // Don't collapse ".." if the previous part is also ".."
