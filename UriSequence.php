@@ -144,13 +144,7 @@ class UriSequence
             $toPath = $this->_makeNoneAbsolutePathSequence($toPath);
 
         $prependPath = $prependUri->getPath();
-        $finalPath   = $this->_makeNoneAbsolutePathSequence(
-            array_merge($prependPath, $toPath)
-        );
-
-        # make it absolute
-        $flagAbsolute = $prependUri->isAbsolute() || $this->isAbsolute();
-        (!$flagAbsolute) ?: array_unshift($finalPath, $this->getSeparator());
+        $finalPath   = array_merge($prependPath, $toPath);
 
         $this->setPath($finalPath);
         return $this;
@@ -520,7 +514,7 @@ class UriSequence
     protected function _makeNoneAbsolutePathSequence(array $pathSequence)
     {
         reset($pathSequence);
-        if (current($pathSequence) === $this->getSeparator())
+        if ( $this->_isRoot(current($pathSequence)) )
             unset($pathSequence[0]);
 
         return $pathSequence;
