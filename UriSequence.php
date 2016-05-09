@@ -276,9 +276,10 @@ class UriSequence
      * - return new pathUri instance with split
      *
      * /var/www/html
-     * split(-1) => "/var/www"
-     * split(0)  => "/"
-     * split(1)  => "var/www/html"
+     * split(0)     => "/var/www/html"
+     * split(1)     => "var/www/html"
+     * split(0, 2)  => "/var"
+     * split(0, -1) => "/var/www"
      *
      * @param int      $start
      * @param null|int $length
@@ -287,11 +288,8 @@ class UriSequence
      */
     function split($start, $length = null)
     {
-        $self = clone $this;
-        $self->normalize();
-        
         $return = clone $this;
-        $path   = array_slice($self->getPath(), $start, $length);
+        $path   = array_slice($this->getPath(), $start, $length);
         $return->setPath($path);
 
         return $return;

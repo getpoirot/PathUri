@@ -66,9 +66,10 @@ interface iUriSequence
      * - return new pathUri instance with split
      *
      * /var/www/html
-     * split(-1) => "/var/www"
-     * split(0)  => "/"
-     * split(1)  => "var/www/html"
+     * split(0)     => "/var/www/html"
+     * split(1)     => "var/www/html"
+     * split(0, 2)  => "/var"
+     * split(0, -1) => "/var/www"
      *
      * @param int      $start
      * @param null|int $length
