@@ -107,11 +107,11 @@ interface iUriSequence
      * /foo  <=> bar  ----> /bar
      * /foo/ <=> bar  ----> /foo/bar
      *
-     * @param iUriSequence $pathUri
+     * @param iUriSequence $mergeUri
      *
      * @return iUriSequence
      */
-    function merge(iUriSequence $pathUri);
+    function merge(iUriSequence $mergeUri);
 
     /**
      * Mask Given PathUri with Current Path

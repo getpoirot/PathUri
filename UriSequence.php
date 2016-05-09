@@ -156,27 +156,29 @@ class UriSequence
      * .     <=> /bar ----> /bar
      * /foo  <=> /bar ----> /bar
      *
+     * 
      * /foo  <=> bar  ----> /bar
      * /foo/ <=> bar  ----> /foo/bar
+     * foo   <=> bar  ----> bar
+     * foo/  <=> bar  ----> foo/bar
      *
-     * @param iUriSequence $pathUri
+     * @param iUriSequence $mergeUri
      *
      * @return iUriSequence
      */
-    function merge(iUriSequence $pathUri)
+    function merge(iUriSequence $mergeUri)
     {
         $return = clone $this;
 
-        if ($pathUri->isAbsolute()) {
-            ## /bar
-            $return = $return->joint($pathUri)->append($return->mask($pathUri));
-        } else {
-            ## bar
-            $return = $return->mask($pathUri)
-                ->split(0, -1)
-                ->append($pathUri)
-            ;
-        }
+        if ($mergeUri->isAbsolute())
+            return $return->setPath($mergeUri->getPath());
+        
+        // 
+        
+        $return = $return->mask($mergeUri)
+            ->split(0, -1)
+            ->append($mergeUri)
+        ;
 
         return $return;
     }
