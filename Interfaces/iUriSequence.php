@@ -139,11 +139,10 @@ interface iUriSequence
      * /var/www/html <=> /var/www/ ===> /var/www
      *
      * @param iUriSequence $pathUri
-     * @param bool        $toggle
      *
      * @return iUriSequence
      */
-    function joint(iUriSequence $pathUri, $toggle = true);
+    function joint(iUriSequence $pathUri);
 
 
     /**

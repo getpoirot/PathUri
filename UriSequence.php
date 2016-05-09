@@ -184,6 +184,38 @@ class UriSequence
     }
 
     /**
+     * Joint Given PathUri with Current Path
+     *
+     * /var/www/html <=> /var/www/ ===> /var/www
+     *
+     * @param iUriSequence $pathUri
+     *
+     * @return iUriSequence
+     */
+    function joint(iUriSequence $pathUri)
+    {
+        $muchLength = $this->getPath();
+        $less       = $pathUri->getPath();
+
+        if ( count($less) > count($muchLength) ) {
+            $muchLength = $less;
+            $less = $this->getPath();
+        }
+
+        $similar = array(); // empty path
+        foreach($muchLength as $i => $v) {
+            if (!array_key_exists($i, $less) || $v != $less[$i])
+                break;
+
+            $similar[] = $v;
+        }
+
+        $path = clone $this;
+        $path->setPath($similar);
+        return $path;
+    }
+
+    /**
      * Mask Given PathUri with Current Path
      *
      * toggle:
@@ -234,39 +266,6 @@ class UriSequence
 
         $path = clone $this;
         $path->setPath($masked);
-        return $path;
-    }
-
-    /**
-     * Joint Given PathUri with Current Path
-     *
-     * /var/www/html <=> /var/www/ ===> /var/www
-     *
-     * @param iUriSequence $pathUri
-     *
-     * @param bool $toggle
-     * @return iUriSequence
-     */
-    function joint(iUriSequence $pathUri, $toggle = true)
-    {
-        $muchLength = $this->getPath();
-        $less       = $pathUri->getPath();
-
-        if ($toggle)
-            (count($less) >= count($muchLength))
-                ? ( $muchLength = $less && $less = $this->getPath() ) : null;
-        ;
-
-        $similar = array(); // empty path
-        foreach($muchLength as $i => $v) {
-            if (!array_key_exists($i, $less) || $v != $less[$i])
-                break;
-
-            $similar[] = $v;
-        }
-
-        $path = clone $this;
-        $path->setPath($similar);
         return $path;
     }
 
