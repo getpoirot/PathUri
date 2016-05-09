@@ -101,15 +101,8 @@ class UriSequence
         $p = $this->getPath();
 
         reset($p);
-        $fi = current($p);
-
-        $result =
-            $fi === $this->getSeparator()
-            ## c:[/df]
-            || substr($fi, -1) === ':'
-        ;
-
-        return $result;
+        $fi     = current($p);
+        return $this->_isRoot($fi);
     }
 
 
@@ -342,16 +335,18 @@ class UriSequence
         $DS = $this->getSeparator();
 
         if ($path == array($DS))
-            // its home, implode not working for on element
+            // its home, implode not working for one element
             return $DS;
 
-        // add empty slashes after all
-        // that implode work properly for
-        // paths with one member
-        $path[] = '';
-        $return = implode( $this->getSeparator(), $this->getPath() );
+        if ($this->isAbsolute() && $path[0] == $this->getSeparator() /* unix style */) {
+            // in specific case "//df" implode result in "///df"
+            unset($path[0]);
+            $return = $this->getSeparator().implode( $this->getSeparator(), $path );
+        } else {
+            $return = implode( $this->getSeparator(), $path );
+        }
+        
         $return = call_user_func($this->getEncodeUri(), $return);
-
         return $return;
     }
 
@@ -374,11 +369,12 @@ class UriSequence
             $paths = $paths + $home;
         }
 
-        $isRoot = substr($paths[0], -1) === ':';
-        $paths  = array_filter($paths, function($p, $i) use (&$isRoot) {
-            if ($isRoot && $i > 0) {
+        $isRoot = $this->_isRoot($paths[0]);
+        $paths  = array_filter($paths, function($p, $i) use (&$isRoot, $paths) {
+            if ( ($isRoot && $i > 0) || $i+1 == count($paths) /* keep last slash remain */) {
+                // keep last slash /go/to/path/
                 // keep first slash after root if exists
-                // phar://path/to/res
+                //   phar://path/to/res
                 $isRoot = false;
                 return true;
             }
@@ -395,7 +391,7 @@ class UriSequence
             if (   '..' === $path && count($normalized) > 0      // keep first segment
                 && '..' !== $normalized[count($normalized) - 1]
             ) {
-                if ($this->getSeparator() !== $normalized[count($normalized) - 1])
+                if (! $this->_isRoot($normalized[count($normalized) - 1]) )
                     array_pop($normalized);
 
                 continue;
@@ -547,5 +543,16 @@ class UriSequence
         
         
         throw new \RuntimeException("Can't Achieve Home Directory On Your Environment.");
+    }
+
+    protected function _isRoot($fi)
+    {
+        $result =
+            $fi === $this->getSeparator()
+            ## c:[/df]
+            || substr($fi, -1) === ':'
+        ;
+
+        return $result;
     }
 }
