@@ -1,26 +1,11 @@
 <?php
 namespace Poirot\PathUri\Interfaces;
 
-/**
- * When you need to know path separator everywhere
- * on this class, you have to catch it from getPath()
- * of this class
- *
- */
-interface iUriFilePath 
+interface iUriPathName 
     extends iUriSequence
 {
     const PATH_AS_ABSOLUTE = 'display.absolute.include.basepath';
     const PATH_AS_RELATIVE = 'display.relative.without.basepath';
-
-    /**
-     * Set Path Separator
-     *
-     * @param string $sep
-     *
-     * @return $this
-     */
-    function setSeparator($sep);
 
     /**
      * Set Base Path

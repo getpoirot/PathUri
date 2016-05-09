@@ -1,11 +1,28 @@
 <?php
 namespace Poirot\PathUri\Interfaces;
 
-interface iUriHttp 
-    extends iUriBase
-{
-    // Parse Getter/Setter Methods:
+/**
+ * Path:
+ * 
+ * - The path can either be 1)empty or 2)absolute (starting with a slash) or
+ * 3)rootless (not starting with a slash). Implementations MUST support all
+ * three syntaxes
+ *
+ * - The value returned MUST be percent-encoded, but MUST NOT double-encode
+ * any characters. To determine what characters to encode, please refer to
+ * RFC 3986, Sections 2 and 3.3.
+ * As an example, if the value should include a slash ("/") not intended as
+ * delimiter between path segments, that value MUST be passed in encoded
+ * form (e.g., "%2F") to the instance.
+ *
+ * @param string|iUriSequence $path
+ *
+ * @return $this
+ */
 
+interface iUriHttp 
+    extends iUriPathName
+{
     /**
      * Set the URI scheme
      *
@@ -103,34 +120,7 @@ interface iUriHttp
      * @return int|null
      */
     function getPort();
-
-    /**
-     * Set the path
-     *
-     * - The path can either be 1)empty or 2)absolute (starting with a slash) or
-     * 3)rootless (not starting with a slash). Implementations MUST support all
-     * three syntaxes
-     *
-     * - The value returned MUST be percent-encoded, but MUST NOT double-encode
-     * any characters. To determine what characters to encode, please refer to
-     * RFC 3986, Sections 2 and 3.3.
-     * As an example, if the value should include a slash ("/") not intended as
-     * delimiter between path segments, that value MUST be passed in encoded
-     * form (e.g., "%2F") to the instance.
-     *
-     * @param string|iUriSequence $path
-     *
-     * @return $this
-     */
-    function setPath($path);
-
-    /**
-     * Get the URI path
-     *
-     * @return iUriSequence
-     */
-    function getPath();
-
+    
     /**
      * Set the query
      *

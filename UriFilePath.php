@@ -1,12 +1,12 @@
 <?php
 namespace Poirot\PathUri;
 
-use Poirot\PathUri\Interfaces\iUriFilePath;
+use Poirot\PathUri\Interfaces\iUriPathName;
 use Poirot\PathUri\Interfaces\iUriSequence;
 
 class UriFilePath
     extends UriSequence
-    implements iUriFilePath
+    implements iUriPathName
 {
     protected $pathSep = '/';
 
@@ -66,9 +66,9 @@ class UriFilePath
         // check the given path has file info .. {
         $pathJoin = new UriSequence();
         $pathJoin->setSeparator($this->getSeparator());
-        $pathJoin->setPathSequence($path);
+        $pathJoin->setPath($path);
 
-        $tmpPath = $pathJoin->getPathSequence();
+        $tmpPath = $pathJoin->getPath();
         if (end($tmpPath) == '..') {
             // we have not filename
             $ret['path'] = $pathJoin;
@@ -95,7 +95,7 @@ class UriFilePath
                 unset($ret['path']);
             else
                 // build pathJoin object
-                $ret['path'] = $pathJoin->setPathSequence($ret['path']);
+                $ret['path'] = $pathJoin->setPath($ret['path']);
         }
 
         return $ret;
@@ -112,9 +112,9 @@ class UriFilePath
         if ($this->getPathStrMode() == self::PATH_AS_ABSOLUTE)
             return true;
 
-        $filePath = clone $this->getPathSequence();
+        $filePath = clone $this->getPath();
         $path = $filePath->normalize()
-            ->getPathSequence();
+            ->getPath();
 
         return (isset($path[0]) && $path[0] == $this->getSeparator());
     }
@@ -164,7 +164,7 @@ class UriFilePath
     {
         return array(
             'basepath'  => $this->getBasePath(),
-            'path'      => $this->getPathSequence(),
+            'path'      => $this->getPath(),
             'basename'  => $this->getBasename(),
             'extension' => $this->getExtension(),
             'filename'  => $this->getFilename(),
@@ -180,7 +180,7 @@ class UriFilePath
      */
     function toString()
     {
-        $finalPath = clone $this->getPathSequence();
+        $finalPath = clone $this->getPath();
 
         if (!$this->allowOverrideBase && $this->normalize)
             // Normalize Filepath before concat them
@@ -360,7 +360,7 @@ class UriFilePath
      *
      * @return $this
      */
-    function setPathSequence($pathUri)
+    function setPath($pathUri)
     {
         if ($pathUri == null)
             $pathUri = array();
@@ -395,7 +395,7 @@ class UriFilePath
      *
      * @return iUriSequence
      */
-    function getPathSequence()
+    function getPath()
     {
         if (!$this->path)
             $this->path = new UriSequence(array('path' => ''));

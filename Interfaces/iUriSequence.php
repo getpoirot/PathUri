@@ -37,7 +37,7 @@ interface iUriSequence
      * @throws \InvalidArgumentException Uri not valid
      * @return $this
      */
-    function setPathSequence(array $path = null);
+    function setPath(array $path = null);
 
     /**
      * Get Uri Path
@@ -46,7 +46,7 @@ interface iUriSequence
      *
      * @return array
      */
-    function getPathSequence();
+    function getPath();
 
     
     /**
