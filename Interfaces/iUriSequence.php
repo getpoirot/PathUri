@@ -118,16 +118,19 @@ interface iUriSequence
      * Mask Given PathUri with Current Path
      *
      * toggle:
-     * /var/www/html <=> /var/www/     ===> /html
+     * /var/www/html <=> /var/www/     ===> html
      * /uri          <=> contact       ===> /uri
-     * /uri          <=> /contact      ===> contact
+     * /uri          <=> /contact      ===> uri
+     * /uri/path     <=> /contact      ===> uri/path
+     * /uri/         <=> /uri/contact  ===> (empty)
+     * /uri/         <=> /uri/contact/ ===> contact/
      *
      * toggle false:
      * /var/www/     <=> /var/www/html ===> ''
      *
      * @param iUriSequence $pathUri
-     * @param bool        $toggle  with toggle always bigger path
-     *                             compared to little one
+     * @param bool           $toggle  with toggle always bigger path
+     *                                compared to little one
      *
      * @return iUriSequence
      */

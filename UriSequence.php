@@ -219,9 +219,12 @@ class UriSequence
      * Mask Given PathUri with Current Path
      *
      * toggle:
-     * /var/www/html <=> /var/www/     ===> /html
+     * /var/www/html <=> /var/www/     ===> html
      * /uri          <=> contact       ===> /uri
-     * /uri          <=> /contact      ===> contact
+     * /uri          <=> /contact      ===> uri
+     * /uri/path     <=> /contact      ===> uri/path
+     * /uri/         <=> /uri/contact  ===> (empty)
+     * /uri/         <=> /uri/contact/ ===> contact/
      *
      * toggle false:
      * /var/www/     <=> /var/www/html ===> ''
@@ -234,39 +237,44 @@ class UriSequence
      */
     function mask(iUriSequence $pathUri, $toggle = true)
     {
+        # the absolute path when another is not is always masked on
+        #- /foo <=> bar ---> /foo
         if (
+            ## one is absolute and another is not
             ($this->isAbsolute() || $pathUri->isAbsolute())
             && !($this->isAbsolute() && $pathUri->isAbsolute())
-        )
-            ## the absolute path when another is not is always masked on
-            ## /foo <=> bar ---> /foo
-            return clone (
-                ($this->isAbsolute())
-                    ? ((/* must not same */ $this->toString() === $pathUri->toString()) ? new UriSequence() : $this)
-                    : $pathUri
-            );
+        ) {
+            $uri = clone $this;
 
-        // ...
+            if ($pathUri->isAbsolute())
+                ### return absolutes one
+                $uri->setPath($pathUri->getPath());
+
+            return $uri;
+        }
+
+
+        // ..
 
         $muchLength = $this->getPath();
         $less       = $pathUri->getPath();
 
-        if ($toggle)
-            (count($less) >= count($muchLength))
-                ? ( $muchLength = $less and $less = $this->getPath() ) : null;
-            ;
+        if ( $toggle && (count($less) > count($muchLength)) ) {
+            $muchLength = $less;
+            $less = $this->getPath();
+        }
 
         $masked = $muchLength;
         foreach($muchLength as $i => $v) {
-            if (!isset($less[$i]) || $v != $less[$i])
+            if (!array_key_exists($i, $less) || $v != $less[$i])
                 break;
 
             unset($masked[$i]);
         }
 
-        $path = clone $this;
-        $path->setPath($masked);
-        return $path;
+        $uri = clone $this;
+        $uri->setPath($masked);
+        return $uri;
     }
 
     /**
