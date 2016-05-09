@@ -25,11 +25,7 @@ $uri = new UriSequence($options);
 
 */
 
-/**
- * note: string paths usually must be normalized from
- *       the class that used this
- */
-class UriSequence 
+class UriSequence
     extends aUri
     implements iUriSequence
 {
@@ -61,7 +57,6 @@ class UriSequence
 
     /**
      * Parse path string to parts in associateArray
-     * // TODO implement rfc 7230 Section 2.7.3 for empty paths and "/"
      *
      * @param string $stringPath
      *
@@ -73,19 +68,15 @@ class UriSequence
 
         $DS = $this->getSeparator();
 
-        ## don`t remove trailing slash, have useful in paths
         // NO Normalization on creating paths
-        // $pathStr = Util::normalizeUnixPath($stringPath, $DS, false);
-        $pathStr = $stringPath;
-        if ($pathStr === $this->getSeparator())
-            ## in case of "/"
-            $path = array($DS,);
-        elseif ($pathStr === '')
+        // we want path same as provided til normalize called!
+        // all slashes are replaced by back slashes "/"
+        $pathStr = $path = str_replace('\\', '/', $stringPath);
+        if ($pathStr === '')
             ## Current Directory
             $path = array();
         else {
             // NO Normalization on creating paths
-            // $path = $this->_normalize(explode($DS, $pathStr));
             $path = explode($DS, $pathStr);
             if (isset($path[0]) && $path[0] == '')
                 // explode affect on absolute addresses
@@ -94,8 +85,8 @@ class UriSequence
         }
 
         return array(
-            'path_sequence' => $path,
-            'separator'     => $DS,
+            'path'      => $path,
+            'separator' => $DS,
         );
     }
 
@@ -107,7 +98,7 @@ class UriSequence
      */
     function isAbsolute()
     {
-        $p = $this->_pathSequence;
+        $p = $this->getPath();
 
         reset($p);
         $fi = current($p);
@@ -133,13 +124,13 @@ class UriSequence
      */
     function append(iUriSequence $appendUri)
     {
-        $appendPath = $appendUri->getPathSequence();
+        $appendPath = $appendUri->getPath();
 
         if ($appendUri->isAbsolute())
             $appendPath = $this->_makeNoneAbsolutePathSequence($appendPath);
 
-        $finalPath = array_merge($this->_pathSequence, $appendPath);
-        $this->setPathSequence($finalPath);
+        $finalPath = array_merge($this->getPath(), $appendPath);
+        $this->setPath($finalPath);
 
         return $this;
     }
@@ -155,11 +146,11 @@ class UriSequence
      */
     function prepend(iUriSequence $prependUri)
     {
-        $toPath = $this->getPathSequence();
+        $toPath = $this->getPath();
         if ($this->isAbsolute())
             $toPath = $this->_makeNoneAbsolutePathSequence($toPath);
 
-        $prependPath = $prependUri->getPathSequence();
+        $prependPath = $prependUri->getPath();
         $finalPath   = $this->_makeNoneAbsolutePathSequence(
             array_merge($prependPath, $toPath)
         );
@@ -168,7 +159,7 @@ class UriSequence
         $flagAbsolute = $prependUri->isAbsolute() || $this->isAbsolute();
         (!$flagAbsolute) ?: array_unshift($finalPath, $this->getSeparator());
 
-        $this->setPathSequence($finalPath);
+        $this->setPath($finalPath);
         return $this;
     }
 
@@ -236,12 +227,12 @@ class UriSequence
 
         // ...
 
-        $muchLength = $this->_pathSequence;
-        $less       = $pathUri->getPathSequence();
+        $muchLength = $this->getPath();
+        $less       = $pathUri->getPath();
 
         if ($toggle)
             (count($less) >= count($muchLength))
-                ? ( $muchLength = $less and $less = $this->_pathSequence ) : null;
+                ? ( $muchLength = $less and $less = $this->getPath() ) : null;
             ;
 
         $masked = $muchLength;
@@ -253,7 +244,7 @@ class UriSequence
         }
 
         $path = clone $this;
-        $path->setPathSequence($masked);
+        $path->setPath($masked);
         return $path;
     }
 
@@ -269,12 +260,12 @@ class UriSequence
      */
     function joint(iUriSequence $pathUri, $toggle = true)
     {
-        $muchLength = $this->_pathSequence;
-        $less       = $pathUri->getPathSequence();
+        $muchLength = $this->getPath();
+        $less       = $pathUri->getPath();
 
         if ($toggle)
             (count($less) >= count($muchLength))
-                ? ( $muchLength = $less && $less = $this->_pathSequence ) : null;
+                ? ( $muchLength = $less && $less = $this->getPath() ) : null;
         ;
 
         $similar = array(); // empty path
@@ -286,7 +277,7 @@ class UriSequence
         }
 
         $path = clone $this;
-        $path->setPathSequence($similar);
+        $path->setPath($similar);
         return $path;
     }
 
@@ -311,8 +302,8 @@ class UriSequence
         $self->normalize();
         
         $return = clone $this;
-        $path   = array_slice($self->getPathSequence(), $start, $length);
-        $return->setPathSequence($path);
+        $path   = array_slice($self->getPath(), $start, $length);
+        $return->setPath($path);
 
         return $return;
     }
@@ -330,8 +321,8 @@ class UriSequence
     function toArray()
     {
         return array(
-            'path_sequence' => $this->_pathSequence,
-            'separator'     => $this->getSeparator()
+            'path'      => $this->getPath(),
+            'separator' => $this->getSeparator()
         );
     }
 
@@ -344,7 +335,7 @@ class UriSequence
      */
     function toString()
     {
-        $path   = $this->_pathSequence;
+        $path   = $this->getPath();
         if (empty($path))
             return '';
 
@@ -358,10 +349,10 @@ class UriSequence
         // that implode work properly for
         // paths with one member
         $path[] = '';
-        $return = implode( $this->getSeparator(), $this->_pathSequence );
+        $return = implode( $this->getSeparator(), $this->getPath() );
         $return = call_user_func($this->getEncodeUri(), $return);
 
-        return _uri::normalizeUnixPath($return, $this->getSeparator(), false);
+        return \Poirot\PathUri\normalizeUnixPath($return, $this->getSeparator(), false);
     }
 
     /**
@@ -371,9 +362,41 @@ class UriSequence
      */
     function normalize()
     {
-        $paths = $this->_normalize($this->getPathSequence());
-        $this->setPathSequence($paths);
+        $normalized = array();
+        $paths      = $this->getPath();
 
+        if (empty($paths))
+            return $normalized;
+
+        // Replace "~" with user's home directory.
+        if ('~' === $paths[0]) {
+            $home  = explode($this->getSeparator(), str_replace('\\', '/', $this->_getHomeDir()));
+            $paths = $paths + $home;
+        }
+        
+        $paths = array_filter($paths, function($p) {
+            // Remove all ['',] from path
+            // on appended path we don't want any absolute sign in
+            // array list
+            return ($p !== '' && $p !== '.');
+        });
+
+        // Collapse ".." with the previous part, if one exists
+        // Don't collapse ".." if the previous part is also ".."
+        foreach ($paths as $path) {
+            if (   '..' === $path && count($normalized) > 0      // keep first segment
+                && '..' !== $normalized[count($normalized) - 1]
+            ) {
+                if ($this->getSeparator() !== $normalized[count($normalized) - 1])
+                    array_pop($normalized);
+
+                continue;
+            }
+
+            $normalized[] = $path;
+        }
+
+        $this->setPath($normalized);
         return $this;
     }
 
@@ -389,7 +412,7 @@ class UriSequence
      */
     function getDepth()
     {
-        return count($this->_pathSequence);
+        return count($this->getPath());
     }
     
     
@@ -404,7 +427,7 @@ class UriSequence
      *
      * @return $this
      */
-    function setPathSequence(array $path = null)
+    function setPath(array $path = null)
     {
         if ($path === null)
             $path = array();
@@ -421,7 +444,7 @@ class UriSequence
      *
      * @return array
      */
-    function getPathSequence()
+    function getPath()
     {
         return $this->_pathSequence;
     }
@@ -498,69 +521,23 @@ class UriSequence
 
         return $pathSequence;
     }
-    
+
     /**
-     * Normalize Array Path
-     *
-     * @param array $paths
-     *
-     * @return array
+     * Get User Home Dir Path
+     * @return string 
+     * @throws \RuntimeException
      */
-    protected function _normalize(array $paths)
+    protected function _getHomeDir()
     {
-        if (empty($paths))
-            return $paths;
+        // For UNIX support
+        if (getenv('HOME'))
+            return getenv('HOME');
 
-        /*$appendPath = array_filter($appendPath, function($p) {
-            // Remove all ['',] from path
-            // on appended path we don't want any absolute sign in
-            // array list
-            return $p !== $this->getSeparator();
-        });*/
-
-        // Cleanup empty directories ".", "//":
-        reset($paths); $i = 0; $indexes = array();
-        while(($val = current($paths)) !== false) {
-            if (
-                ($val == $this->getSeparator() || $val === '' || $val === '.')
-                && ($i > 0 && ($i < count($paths) -1 || $val === '.') /* get last one slash */)
-            )
-                $indexes[] = key($paths);
-
-            $i++;
-            next($paths);
-        }
-
-        foreach($indexes as $i)
-            unset($paths[$i]);
-
-        // Normalize go up to parent "..":
-        reset($paths); $prevIndex = null;
-        while(in_array('..', $paths, true))
-        {
-            $currIndex = key($paths);
-            $currItem  = current($paths);
-
-            if ($currItem == '..')
-            {
-                if ($prevIndex !== null
-                    // we don't want to go back further than home
-                    && $paths[$prevIndex] !== ''
-                ) {
-                    unset($paths[$prevIndex]);
-                }
-
-                unset($paths[$currIndex]);
-
-                $prevIndex = null;
-                reset($paths);
-                continue;
-            }
-
-            $prevIndex = $currIndex;
-            next($paths);
-        }
-
-        return $paths;
+        // For >= Windows8 support
+        if (getenv('HOMEDRIVE') && getenv('HOMEPATH'))
+            return getenv('HOMEDRIVE').getenv('HOMEPATH');
+        
+        
+        throw new \RuntimeException("Can't Achieve Home Directory On Your Environment.");
     }
 }
