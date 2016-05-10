@@ -5,7 +5,6 @@ use Poirot\PathUri\Http\DataQueryParams;
 use Poirot\PathUri\Interfaces\iUriHttp;
 use Poirot\PathUri\Interfaces\iDataQueryParams;
 use Poirot\PathUri\Interfaces\iUriSequence;
-use Poirot\PathUri\Psr\UriInterface;
 
 class UriHttp
     extends UriPathName
