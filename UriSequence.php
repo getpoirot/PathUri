@@ -38,9 +38,10 @@ class UriSequence
     protected $separator = '/';
 
     /** @var \Closure */
-    protected $encodeUri;
+    protected $_encodeMethod;
+    protected $_isEncodeEnabled = true;
 
-    
+
     /**
      * SeqPathJoinUri constructor.
      * @param array $setter
@@ -347,7 +348,9 @@ class UriSequence
             $return = implode( $this->getSeparator(), $path );
         }
         
-        $return = call_user_func($this->getEncodeUri(), $return);
+        if ($this->isEncodeEnabled())
+            $return = call_user_func($this->_getEncodeMethod(), $return);
+        
         return $return;
     }
 
@@ -478,15 +481,42 @@ class UriSequence
     }
 
     /**
-     * Set Encode Uri
+     * Enable/Disable Uri Encode
      *
-     * @param \Closure $encoder
+     * - when encode is enabled maybe uri uses
+     *   internal encode method instead of user
+     *   defined
+     *
+     * @param bool $enable
      *
      * @return $this
      */
-    function setEncodeUri(\Closure $encoder)
+    function setEncodeEnable($enable = true)
     {
-        $this->encodeUri = $encoder;
+        $this->_isEncodeEnabled = (boolean) $enable;
+        return $this;
+    }
+    
+    /**
+     * Set Encode Uri Method
+     * - encode uri on toString
+     *
+     * callable:
+     * string function(string $uri)
+     *
+     * @param callable $encoder
+     *
+     * @return $this
+     */
+    function setEncodeMethod($encoder)
+    {
+        if (!is_callable($encoder))
+            throw new \InvalidArgumentException(sprintf(
+                'Encode Method must be callable; given: %s'
+                , \Poirot\Std\flatten($encoder)
+            ));
+
+        $this->_encodeMethod = $encoder;
         return $this;
     }
 
@@ -495,14 +525,25 @@ class UriSequence
      *
      * @return \Closure
      */
-    function getEncodeUri()
+    function isEncodeEnabled()
     {
-        if ($this->encodeUri)
-            return $this->encodeUri;
+        return $this->_isEncodeEnabled;
+    }
+
+    
+    // ...
+
+    /**
+     * @return callable
+     */
+    function _getEncodeMethod()
+    {
+        if ($this->_encodeMethod)
+            return $this->_encodeMethod;
 
         // ..
 
-        $this->encodeUri = function($pathStr) {
+        $this->_encodeMethod = function($pathStr) {
             return preg_replace_callback(
                 '/(?:[^a-zA-Z0-9_\-\.~:@&=\+\$,\/;%]+|%(?![A-Fa-f0-9]{2}))/',
                 function (array $matches) {
@@ -512,11 +553,8 @@ class UriSequence
             );
         };
 
-        return $this->getEncodeUri();
+        return $this->_getEncodeMethod();
     }
-
-    
-    // ...
 
     protected function _makeNoneAbsolutePathSequence(array $pathSequence)
     {

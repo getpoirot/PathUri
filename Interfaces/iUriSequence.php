@@ -147,20 +147,36 @@ interface iUriSequence
      */
     function joint(iUriSequence $pathUri);
 
-
     /**
-     * Set Encode Uri
+     * Enable/Disable Uri Encode
      *
-     * @param \Closure $encoder
+     * - when encode is enabled maybe uri uses
+     *   internal encode method instead of user
+     *   defined
+     *
+     * @param bool $enable
      *
      * @return $this
      */
-    function setEncodeUri(\Closure $encoder);
+    function setEncodeEnable($enable = true);
 
     /**
-     * Get Encode Uri
+     * Set Encode Uri Method
+     * - encode uri on toString
      *
-     * @return \Closure
+     * callable:
+     * string function(string $uri)
+     *
+     * @param callable $encoder
+     *
+     * @return $this
      */
-    function getEncodeUri();
+    function setEncodeMethod(/*callable*/ $encoder);
+
+    /**
+     * Is Enable Uri Encode
+     *
+     * @return boolean
+     */
+    function isEncodeEnabled();
 }
