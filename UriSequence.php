@@ -521,9 +521,9 @@ class UriSequence
     }
 
     /**
-     * Get Encode Uri
+     * Is Enable Uri Encode
      *
-     * @return \Closure
+     * @return boolean
      */
     function isEncodeEnabled()
     {
