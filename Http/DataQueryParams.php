@@ -2,7 +2,6 @@
 namespace Poirot\PathUri\Http;
 
 use Poirot\PathUri\Interfaces\iDataQueryParams;
-use Poirot\Std\Interfaces\Pact\ipConfigurable;
 use Poirot\Std\Struct\DataEntity;
 
 class DataQueryParams 
