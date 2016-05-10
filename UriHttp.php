@@ -1,19 +1,20 @@
 <?php
 namespace Poirot\PathUri;
 
+use Poirot\PathUri\Http\DataQueryParams;
 use Poirot\PathUri\Interfaces\iUriHttp;
 use Poirot\PathUri\Interfaces\iDataQueryParams;
 use Poirot\PathUri\Interfaces\iUriSequence;
 use Poirot\PathUri\Psr\UriInterface;
 
 class UriHttp
-    extends aUri
+    extends UriPathName
     implements iUriHttp
 {
-    static $SCHEME = [
+    static $SCHEME = array(
         'http'  => 80,
         'https' => 443,
-    ];
+    );
 
     /*
         URI parts:
@@ -25,27 +26,6 @@ class UriHttp
     protected $path;
     protected $query;
     protected $fragment;
-
-    /**
-     * Build Object From PathUri
-     *
-     * - don't reset this object, so values merged with new one
-     *
-     * note: it take a instance of pathUri object
-     *   same as base object
-     *
-     * @param UriInterface|iUriHttp $path
-     *
-     * @throws \InvalidArgumentException
-     * @return $this
-     */
-    function fromPathUri(/*iPathAbstractUri*/ $path)
-    {
-        if ($path instanceof UriInterface)
-            $path = new UriHttp((string) $path);
-
-        return parent::fromPathUri($path);
-    }
 
     /**
      * Build Object From String
@@ -94,16 +74,6 @@ class UriHttp
     }
 
     /**
-     * Get Path Separator
-     *
-     * @return string
-     */
-    function getSeparator()
-    {
-        return '/';
-    }
-
-    /**
      * Set the URI scheme
      *
      * @param string $scheme
@@ -123,7 +93,6 @@ class UriHttp
             ));*/
 
         $this->scheme = $scheme;
-
         return $this;
     }
 
@@ -152,7 +121,6 @@ class UriHttp
     function setUserInfo($userInfo)
     {
         $this->userInfo = $userInfo;
-
         return $this;
     }
 
@@ -192,7 +160,6 @@ class UriHttp
     function setHost($host)
     {
         $this->host = strtolower((string) $host);
-
         return $this;
     }
 
@@ -225,7 +192,6 @@ class UriHttp
         }
 
         $this->port = $port;
-
         return $this;
     }
 
@@ -307,8 +273,8 @@ class UriHttp
                 'Invalid path provided; must not contain a URI fragment'
             );
 
-        $this->path = $path->setSeparator($this->getSeparator());
 
+        $this->path = $path->setSeparator($this->getSeparator());
         return $this;
     }
 
@@ -328,14 +294,13 @@ class UriHttp
      * $resource when using as string
      * first=value&arr[]=foo+bar&arr[]=baz
      *
-     * @param string|array|iPoirotEntity $query
+     * @param string|array|\Traversable $query
      *
      * @return $this
      */
     function setQuery($query)
     {
-        $this->getQuery()->from($query);
-
+        $this->getQuery()->import($query);
         return $this;
     }
 
@@ -365,7 +330,6 @@ class UriHttp
     function setFragment($fragment)
     {
         $this->fragment = $fragment;
-
         return $this;
     }
 
@@ -381,8 +345,6 @@ class UriHttp
 
     /**
      * Is Absolute Path?
-     *
-     * - in most cases substr[0]-1 == ":" mean we have on absolute path
      *
      * @return boolean
      */
@@ -400,7 +362,7 @@ class UriHttp
      */
     function toArray()
     {
-        $parse = [
+        $parse = array(
             'scheme'    => $this->getScheme(),
             'user_info' => $this->getUserInfo(),
             'host'      => $this->getHost(),
@@ -408,27 +370,9 @@ class UriHttp
             'path'      => $this->getPath(),
             'query'     => $this->getQuery(),
             'fragment'  => $this->getFragment(),
-        ];
+        );
 
-        ## only return values that not null
-        return array_filter($parse, function($v) {
-            if ($v instanceof iPoirotEntity)
-                return !$v->isEmpty();
-
-            return !($v === null);
-        });
-    }
-
-    /**
-     * Normalize Array Path Stored On Class
-     *
-     * @return $this
-     */
-    function normalize()
-    {
-        $this->getPath()->normalize();
-
-        return $this;
+        return $parse;
     }
 
     /**
@@ -464,7 +408,7 @@ class UriHttp
         elseif ($this->getHost() && (!$this->getQuery()->isEmpty() || $this->getFragment()))
             $uri .= '/';
 
-        if ($this->getQuery()->borrow()) {
+        if (\Poirot\Std\cast($this->getQuery())->toArray()) {
             $regex   = '/(?:[^' .'a-zA-Z0-9_\-\.~' .'!\$&\'\(\)\*\+,;=' .'%:@\/\?]+|%(?![A-Fa-f0-9]{2}))/';
             $uri .= "?" . preg_replace_callback($regex, $replace, $this->getQuery()->toString());
         }
@@ -499,15 +443,5 @@ class UriHttp
     {
         (!$this->query) ?: $this->query = clone $this->query;
         (!$this->path)  ?: $this->path  = clone $this->path;
-    }
-
-    /**
-     * Parse path string to parts in associateArray
-     * @param string $stringPath
-     * @return mixed
-     */
-    function doParseFromString($stringPath)
-    {
-        // TODO: Implement doParseFromString() method.
     }
 }
