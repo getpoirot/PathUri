@@ -10,7 +10,7 @@ class UriHttp
     extends UriPathName
     implements iUriHttp
 {
-    static $SCHEME = array(
+    static protected $SCHEME = array(
         'http'  => 80,
         'https' => 443,
     );
@@ -22,54 +22,124 @@ class UriHttp
     protected $userInfo;
     protected $host;
     protected $port;
-    protected $path;
     protected $query;
     protected $fragment;
 
+
     /**
-     * Build Object From String
+     * Parse path string to parts in associateArray
      *
-     * - parse string to associateArray setter
-     * - return value of this method must can be
-     *   used as an argument for fromArray
+     * @param string $stringPath
      *
-     * @param string $pathStr
-     *
-     * @throws \InvalidArgumentException
-     * @return array
+     * @return mixed
      */
-    function parse($pathStr)
+    protected function doParseFromString($stringPath)
     {
-        if (!is_string($pathStr))
-            throw new \InvalidArgumentException(sprintf(
-                'PathStr must be string but "%s" given.'
-                , is_object($pathStr) ? get_class($pathStr) : gettype($pathStr)
-            ));
+        $parsed = array(
+            'scheme'    => '',
+            'user_info' => '',
+            'host'      => '',
+            'port'      => '',
+            'path'      => '',
+            'query'     => '',
+            'fragment'  => '',
+        );
 
-        $return = [];
+        $stringPath = str_replace('\\', '/', $stringPath);
 
-        // userInfo part:
-        if (preg_match('/\/(?P<user_info>([\w]+[:]*[\w])+)@(\w+)/', $pathStr, $match)) {
-            $return['user_info'] = $match['user_info'];
-            $pathStr = str_replace($return['user_info'].'@', '', $pathStr);
+        # userInfo part:
+        if (preg_match('/\/(?P<user_info>([\w]+[:]*[\w])+)@(\w+)/', $stringPath, $match)) {
+            $parsed['user_info'] = $match['user_info'];
+            // then remove
+            $stringPath = str_replace($parsed['user_info'].'@', '', $stringPath);
         }
 
-        $parse  = parse_url($pathStr);
-        if (false === $parse)
-            throw new \InvalidArgumentException(
-                'The source URI string seems invalid.'
-            );
+        $purl = parse_url($stringPath);
+        if ($purl === false)
+            throw new \InvalidArgumentException(sprintf(
+                'The source URI string seems invalid; given: "%s".'
+                , $stringPath
+            ));
 
-        $return = array_merge($parse, $return);
+        $parsed = array_merge($parsed, $purl);
 
         # filter parts
-        array_walk($return, function(&$item, $key) {
-            $method = '__filter'.\Poirot\Core\sanitize_camelcase($key);
+        array_walk($parsed, function(&$item, $key) {
+            $method = '_filter'.\Poirot\Std\cast((string)$key)->camelCase();
             if (method_exists($this, $method))
-                $item = call_user_func([$this, $method], $item);
+                $item = call_user_func(array($this, $method), $item);
         });
 
-        return $return;
+        $parsed = array_merge($parsed, parent::doParseFromString($parsed['path']));
+        return $parsed;
+    }
+
+    /**
+     * Get Array In Form Of AssocArray
+     *
+     * note: this array can be used as input for fromArray
+     *
+     * @return array
+     */
+    function toArray()
+    {
+        $parse = array(
+            'scheme'    => $this->getScheme(),
+            'user_info' => $this->getUserInfo(),
+            'host'      => $this->getHost(),
+            'port'      => $this->getPort(),
+            'path'      => $this->getPath(),
+            'query'     => $this->getQuery()->toString(),
+            'fragment'  => $this->getFragment(),
+        );
+
+        return $parse;
+    }
+
+    /**
+     * Get Assembled Path As String
+     *
+     * - don`t call normalize path inside this method
+     *   normalizing does happen by case
+     *
+     * @return string
+     */
+    function toString()
+    {
+        $uri = '';
+
+        if ($this->getScheme())
+            $uri .= $this->getScheme() . ':'. '//';
+
+        if ($this->getHost() !== null) {
+            if ($this->getUserInfo())
+                $uri .= $this->getUserInfo() . '@';
+
+            $uri .= $this->getHost();
+            if ($this->getPort())
+                $uri .= ':' . $this->getPort();
+        }
+
+        $replace = function ($match) {
+            return rawurlencode($match[0]);
+        };
+
+        if ($this->getPath())
+            $uri .= $this->getPath()->toString();
+        elseif ($this->getHost() && (!$this->getQuery()->isEmpty() || $this->getFragment()))
+            $uri .= '/';
+
+        if (\Poirot\Std\cast($this->getQuery())->toArray()) {
+            $regex   = '/(?:[^' .'a-zA-Z0-9_\-\.~' .'!\$&\'\(\)\*\+,;=' .'%:@\/\?]+|%(?![A-Fa-f0-9]{2}))/';
+            $uri .= "?" . preg_replace_callback($regex, $replace, $this->getQuery()->toString());
+        }
+
+        if ($this->getFragment()) {
+            $regex   = '/(?:[^' .'a-zA-Z0-9_\-\.~' .'!\$&\'\(\)\*\+,;=' .'%:@\/\?]+|%(?![A-Fa-f0-9]{2}))/';
+            $uri .= "#" . preg_replace_callback($regex, $replace, $this->getFragment());
+        }
+
+        return $uri;
     }
 
     /**
@@ -249,7 +319,7 @@ class UriHttp
      *
      * @return $this
      */
-    function setPath($path)
+    function xsetPath($path)
     {
         if (is_string($path))
             $path = new UriSequence($path);
@@ -278,16 +348,6 @@ class UriHttp
     }
 
     /**
-     * Get the URI path
-     *
-     * @return iUriSequence
-     */
-    function getPath()
-    {
-        return $this->path;
-    }
-
-    /**
      * Set the query
      *
      * $resource when using as string
@@ -299,7 +359,8 @@ class UriHttp
      */
     function setQuery($query)
     {
-        $this->getQuery()->import($query);
+        $query = $this->getQuery();
+        $query->with($query::parseWith($query));
         return $this;
     }
 
@@ -351,96 +412,25 @@ class UriHttp
     {
         return ($this->getScheme() !== null);
     }
-
-    /**
-     * Get Array In Form Of AssocArray
-     *
-     * note: this array can be used as input for fromArray
-     *
-     * @return array
-     */
-    function toArray()
-    {
-        $parse = array(
-            'scheme'    => $this->getScheme(),
-            'user_info' => $this->getUserInfo(),
-            'host'      => $this->getHost(),
-            'port'      => $this->getPort(),
-            'path'      => $this->getPath(),
-            'query'     => $this->getQuery(),
-            'fragment'  => $this->getFragment(),
-        );
-
-        return $parse;
-    }
-
-    /**
-     * Get Assembled Path As String
-     *
-     * - don`t call normalize path inside this method
-     *   normalizing does happen by case
-     *
-     * @return string
-     */
-    function toString()
-    {
-        $uri = '';
-
-        if ($this->getScheme())
-            $uri .= $this->getScheme() . ':'. '//';
-
-        if ($this->getHost() !== null) {
-            if ($this->getUserInfo())
-                $uri .= $this->getUserInfo() . '@';
-
-            $uri .= $this->getHost();
-            if ($this->getPort())
-                $uri .= ':' . $this->getPort();
-        }
-
-        $replace = function ($match) {
-            return rawurlencode($match[0]);
-        };
-
-        if ($this->getPath())
-            $uri .= $this->getPath()->toString();
-        elseif ($this->getHost() && (!$this->getQuery()->isEmpty() || $this->getFragment()))
-            $uri .= '/';
-
-        if (\Poirot\Std\cast($this->getQuery())->toArray()) {
-            $regex   = '/(?:[^' .'a-zA-Z0-9_\-\.~' .'!\$&\'\(\)\*\+,;=' .'%:@\/\?]+|%(?![A-Fa-f0-9]{2}))/';
-            $uri .= "?" . preg_replace_callback($regex, $replace, $this->getQuery()->toString());
-        }
-
-        if ($this->getFragment()) {
-            $regex   = '/(?:[^' .'a-zA-Z0-9_\-\.~' .'!\$&\'\(\)\*\+,;=' .'%:@\/\?]+|%(?![A-Fa-f0-9]{2}))/';
-            $uri .= "#" . preg_replace_callback($regex, $replace, $this->getFragment());
-        }
-
-        return $uri;
-    }
     
 
     // ..
 
     /**
      * Filter Scheme
-     *
      * @param string $scheme
-     *
      * @return string
      */
     function _filterScheme($scheme)
     {
         $scheme = strtolower($scheme);
         $scheme = preg_replace('#:(//)?$#', '', $scheme);
-
         return $scheme;
     }
+
 
     function __clone()
     {
         (!$this->query) ?: $this->query = clone $this->query;
-        (!$this->path)  ?: $this->path  = clone $this->path;
     }
 }
