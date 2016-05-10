@@ -27,7 +27,7 @@ abstract class aUri
      * @param string $stringPath
      * @return mixed
      */
-    abstract function doParseFromString($stringPath);
+    abstract protected function doParseFromString($stringPath);
 
     /**
      * @override Ensure Throw Exception False

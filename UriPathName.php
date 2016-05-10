@@ -3,7 +3,7 @@ namespace Poirot\PathUri;
 
 use Poirot\PathUri\Interfaces\iUriPathName;
 
-class UriFilePath
+class UriPathName
     extends UriSequence
     implements iUriPathName
 {
@@ -17,7 +17,7 @@ class UriFilePath
      *
      * @return mixed
      */
-    function doParseFromString($stringPath)
+    protected function doParseFromString($stringPath)
     {
         #! Parse string may give:
         #- . and .. in some cases

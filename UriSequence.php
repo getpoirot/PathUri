@@ -49,7 +49,7 @@ class UriSequence
      *
      * @return mixed
      */
-    function doParseFromString($stringPath)
+    protected function doParseFromString($stringPath)
     {
         $stringPath = (string) $stringPath;
 
@@ -510,5 +510,18 @@ class UriSequence
         ;
 
         return $result;
+    }
+
+    /**
+     * Converts string to lower-case
+     * @param string $str
+     * @return string 
+     */
+    protected function _toLower($str)
+    {
+        if (function_exists('mb_strtolower'))
+            return mb_strtolower($str, mb_detect_encoding($str));
+
+        return strtolower($str);
     }
 }
