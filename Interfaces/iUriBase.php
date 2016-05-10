@@ -48,7 +48,8 @@ interface iUriBase
      * Get Assembled Path As String
      *
      * - don`t call normalize path inside this method
-     *   normalizing does happen by case
+     *   normalizing does happen when needed by call
+     *   ::normalize
      *
      * @return string
      */

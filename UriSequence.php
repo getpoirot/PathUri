@@ -39,23 +39,9 @@ class UriSequence
 
     /** @var \Closure */
     protected $_encodeMethod;
-    protected $_isEncodeEnabled = true;
+    protected $_isEncodeEnabled = false;
 
-
-    /**
-     * SeqPathJoinUri constructor.
-     * @param array $setter
-     */
-    function __construct(array $setter = null)
-    {
-        $this->putBuildPriority(array(
-            ## first set separator that is necessary for other process 
-            'separator'
-        ));
-        
-        parent::__construct($setter);
-    }
-
+    
     /**
      * Parse path string to parts in associateArray
      *
@@ -72,13 +58,18 @@ class UriSequence
         // NO Normalization on creating paths
         // we want path same as provided til normalize called!
         // all slashes are replaced by back slashes "/"
-        $pathStr = $path = str_replace('\\', '/', $stringPath);
+        $pathStr = str_replace('\\', '/', $stringPath);
         if ($pathStr === '')
             ## Current Directory
             $path = array();
         else {
             // NO Normalization on creating paths
             $path = explode($DS, $pathStr);
+
+            if (count($path) == 2 && $path[0] === $path[1] && $path[0] == '')
+                // explode for "/" single slash
+                unset($path[1]);
+
             if (isset($path[0]) && $path[0] == '')
                 // explode affect on absolute addresses
                 // start with separator. exp. "/var/www/"
@@ -324,7 +315,9 @@ class UriSequence
     /**
      * Get Assembled Path As String
      *
-     * - the path must normalized before output
+     * - don`t call normalize path inside this method
+     *   normalizing does happen when needed by call
+     *   ::normalize
      *
      * @return string
      */
@@ -347,10 +340,7 @@ class UriSequence
         } else {
             $return = implode( $this->getSeparator(), $path );
         }
-        
-        if ($this->isEncodeEnabled())
-            $return = call_user_func($this->_getEncodeMethod(), $return);
-        
+
         return $return;
     }
 
@@ -480,82 +470,9 @@ class UriSequence
         return $this->separator;
     }
 
-    /**
-     * Enable/Disable Uri Encode
-     *
-     * - when encode is enabled maybe uri uses
-     *   internal encode method instead of user
-     *   defined
-     *
-     * @param bool $enable
-     *
-     * @return $this
-     */
-    function setEncodeEnable($enable = true)
-    {
-        $this->_isEncodeEnabled = (boolean) $enable;
-        return $this;
-    }
-    
-    /**
-     * Set Encode Uri Method
-     * - encode uri on toString
-     *
-     * callable:
-     * string function(string $uri)
-     *
-     * @param callable $encoder
-     *
-     * @return $this
-     */
-    function setEncodeMethod($encoder)
-    {
-        if (!is_callable($encoder))
-            throw new \InvalidArgumentException(sprintf(
-                'Encode Method must be callable; given: %s'
-                , \Poirot\Std\flatten($encoder)
-            ));
-
-        $this->_encodeMethod = $encoder;
-        return $this;
-    }
-
-    /**
-     * Is Enable Uri Encode
-     *
-     * @return boolean
-     */
-    function isEncodeEnabled()
-    {
-        return $this->_isEncodeEnabled;
-    }
-
     
     // ...
-
-    /**
-     * @return callable
-     */
-    function _getEncodeMethod()
-    {
-        if ($this->_encodeMethod)
-            return $this->_encodeMethod;
-
-        // ..
-
-        $this->_encodeMethod = function($pathStr) {
-            return preg_replace_callback(
-                '/(?:[^a-zA-Z0-9_\-\.~:@&=\+\$,\/;%]+|%(?![A-Fa-f0-9]{2}))/',
-                function (array $matches) {
-                    return rawurlencode($matches[0]);
-                }
-                , $pathStr
-            );
-        };
-
-        return $this->_getEncodeMethod();
-    }
-
+    
     protected function _makeNoneAbsolutePathSequence(array $pathSequence)
     {
         reset($pathSequence);

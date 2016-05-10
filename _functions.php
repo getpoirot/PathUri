@@ -30,3 +30,14 @@ function normalizeUnixPath($path, $separator = '/', $stripTrailingSlash = true)
 
     return $path;
 }
+
+function encodeUri($pathStr) 
+{
+    return preg_replace_callback(
+        '/(?:[^a-zA-Z0-9_\-\.~:@&=\+\$,\/;%]+|%(?![A-Fa-f0-9]{2}))/',
+        function (array $matches) {
+            return rawurlencode($matches[0]);
+        }
+        , $pathStr
+    );
+}

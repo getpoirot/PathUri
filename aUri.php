@@ -9,11 +9,35 @@ abstract class aUri
     implements iUriBase
 {
     /**
+     * SeqPathJoinUri constructor.
+     * @param array $setter
+     */
+    function __construct(array $setter = null)
+    {
+        $this->putBuildPriority(array(
+            ## first set separator that is necessary for other process 
+            'separator'
+        ));
+
+        parent::__construct($setter);
+    }
+    
+    /**
      * Parse path string to parts in associateArray
      * @param string $stringPath
      * @return mixed
      */
     abstract function doParseFromString($stringPath);
+
+    /**
+     * @override Ensure Throw Exception False
+     * @inheritdoc
+     */
+    function with(array $options, $throwException = false)
+    {
+        parent::with($options, $throwException);
+        return $this;
+    }
     
     /**
      * Build Path From Given Resources
