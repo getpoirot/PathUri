@@ -2,7 +2,8 @@
 namespace Poirot\PathUri\Psr;
 
 use Poirot\PathUri\UriHttp;
-use Poirot\PathUri\Interfaces\iUriBase;
+use Poirot\PathUri\UriPathName;
+use Poirot\PathUri\UriSequence;
 
 class PsrUriHttp 
     implements UriInterface
@@ -13,14 +14,14 @@ class PsrUriHttp
     /**
      * Construct
      *
-     * @param iUriBase|string|array $uri
+     * @param UriHttp|string|array $uri
      */
     function __construct($uri)
     {
         if ($uri instanceof UriHttp)
             $this->httpUri = $uri;
         else
-            $this->httpUri = new UriHttp($uri);
+            $this->httpUri = new UriHttp(UriHttp::parseWith($uri));
     }
     
     /**
@@ -160,7 +161,8 @@ class PsrUriHttp
      */
     function getPath()
     {
-        return $this->httpUri->getPath()->toString();
+        $path = new UriSequence($this->httpUri->getPath());
+        return $path->toString();
     }
 
     /**
@@ -232,7 +234,6 @@ class PsrUriHttp
 
         $new = clone $this;
         $new->httpUri->setScheme($scheme);
-
         return $new;
     }
 
@@ -259,7 +260,6 @@ class PsrUriHttp
 
         $new = clone $this;
         $new->httpUri->setUserInfo($user);
-
         return $new;
     }
 
@@ -282,7 +282,6 @@ class PsrUriHttp
 
         $new = clone $this;
         $new->httpUri->setHost($host);
-
         return $new;
     }
 
@@ -312,7 +311,6 @@ class PsrUriHttp
 
         $new = clone $this;
         $new->httpUri->setPort($port);
-
         return $new;
     }
 
@@ -340,16 +338,19 @@ class PsrUriHttp
      */
     function withPath($path)
     {
-        $path    = (string) $path;
-        $pathUri = clone $this->httpUri->getPath();
-        $pathUri->setPath($path);
-
-        if ($pathUri->toString() === $this->httpUri->getPath()->toString())
+        ## compare paths
+        $newPath = (string) $path;
+        $newPath = UriPathName::parseWith($newPath);
+        
+        $curPath = new UriPathName($this->httpUri->toArray());
+        $curPath = $curPath->toArray();
+        
+        if ( $newPath === $curPath )
             return $this;
 
+        
         $new = clone $this;
-        $new->httpUri->setPath($path);
-
+        $new->httpUri->setPath($newPath);
         return $new;
     }
 
@@ -376,7 +377,6 @@ class PsrUriHttp
 
         $new = clone $this->httpUri;
         $new->setQuery($query);
-
         return $new;
     }
 
@@ -402,7 +402,6 @@ class PsrUriHttp
 
         $new = clone $this;
         $new->httpUri->setFragment($fragment);
-
         return $new;
     }
     

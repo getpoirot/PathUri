@@ -4,7 +4,22 @@ namespace Poirot\PathUri;
 use Poirot\PathUri\Http\DataQueryParams;
 use Poirot\PathUri\Interfaces\iUriHttp;
 use Poirot\PathUri\Interfaces\iDataQueryParams;
-use Poirot\PathUri\Interfaces\iUriSequence;
+
+/*
+ * Path:
+ *
+ * - The path can either be 1)empty or 2)absolute (starting with a slash) or
+ * 3)rootless (not starting with a slash). Implementations MUST support all
+ * three syntaxes
+ *
+ * - The value returned MUST be percent-encoded, but MUST NOT double-encode
+ * any characters. To determine what characters to encode, please refer to
+ * RFC 3986, Sections 2 and 3.3.
+ * As an example, if the value should include a slash ("/") not intended as
+ * delimiter between path segments, that value MUST be passed in encoded
+ * form (e.g., "%2F") to the instance.
+ *
+ */
 
 class UriHttp
     extends UriPathName
@@ -120,15 +135,12 @@ class UriHttp
                 $uri .= ':' . $this->getPort();
         }
 
-        $replace = function ($match) {
-            return rawurlencode($match[0]);
-        };
+        $uri .= parent::toString();
 
-        if ($this->getPath())
-            $uri .= $this->getPath()->toString();
-        elseif ($this->getHost() && (!$this->getQuery()->isEmpty() || $this->getFragment()))
+        if ($this->getHost() && (!$this->getQuery()->isEmpty() || $this->getFragment()))
             $uri .= '/';
 
+        $replace = function ($match) { return rawurlencode($match[0]); };
         if (\Poirot\Std\cast($this->getQuery())->toArray()) {
             $regex   = '/(?:[^' .'a-zA-Z0-9_\-\.~' .'!\$&\'\(\)\*\+,;=' .'%:@\/\?]+|%(?![A-Fa-f0-9]{2}))/';
             $uri .= "?" . preg_replace_callback($regex, $replace, $this->getQuery()->toString());
@@ -152,14 +164,7 @@ class UriHttp
      */
     function setScheme($scheme)
     {
-        $scheme = $this->_filterScheme($scheme);
-
-        /*if(!empty($scheme) && !isset(self::$SCHEME[$scheme]))
-            throw new \InvalidArgumentException(sprintf(
-                'Unsupported scheme "%s"; must be any empty string or in the set (%s)'
-                , $scheme
-                , implode(', ', array_keys(self::$SCHEME))
-            ));*/
+        $scheme = $this->_filterScheme((string) $scheme);
 
         $this->scheme = $scheme;
         return $this;
@@ -189,7 +194,7 @@ class UriHttp
      */
     function setUserInfo($userInfo)
     {
-        $this->userInfo = $userInfo;
+        $this->userInfo = (string) $userInfo;
         return $this;
     }
 
@@ -200,7 +205,7 @@ class UriHttp
      * The info syntax of the URI is:
      * [user-info@]host
      *
-     * @return string|false The URI user information, in "username[:password]" format
+     * @return string|null
      */
     function getUserInfo()
     {
@@ -228,7 +233,7 @@ class UriHttp
      */
     function setHost($host)
     {
-        $this->host = strtolower((string) $host);
+        $this->host = $this->_filterHost((string) $host);
         return $this;
     }
 
@@ -237,7 +242,7 @@ class UriHttp
      *
      * - The value returned MUST be normalized to lowercase
      *
-     * @return string|false
+     * @return string|null
      */
     function getHost()
     {
@@ -247,18 +252,20 @@ class UriHttp
     /**
      * Set the URI host port
      *
-     * @param int $port
+     * @param int|null $port
      *
      * @return $this
      */
     function setPort($port)
     {
-        if ($port < 1 || $port > 65535) {
+        if (empty($port) && $port !== 0)
+            $port = null;
+        elseif ($port < 1 || $port > 65535)
             throw new \InvalidArgumentException(sprintf(
                 'Invalid port "%d" specified; must be a valid TCP/UDP port',
                 $port
             ));
-        }
+
 
         $this->port = $port;
         return $this;
@@ -277,7 +284,7 @@ class UriHttp
      * - If no port is present, but a scheme is present, this method MAY return
      * the standard port for that scheme, but SHOULD return null
      *
-     * @param bool $preserve
+     * @param bool $preserve Need Port Number Anyway
      *
      * @return null|int
      */
@@ -298,53 +305,8 @@ class UriHttp
                     && $this->port === self::$SCHEME[$scheme]
                     && $preserve === false
                 ) ? null : $this->port
-            ) : null;
-    }
-
-    /**
-     * Set the path
-     *
-     * - The path can either be 1)empty or 2)absolute (starting with a slash) or
-     * 3)rootless (not starting with a slash). Implementations MUST support all
-     * three syntaxes
-     *
-     * - The value returned MUST be percent-encoded, but MUST NOT double-encode
-     * any characters. To determine what characters to encode, please refer to
-     * RFC 3986, Sections 2 and 3.3.
-     * As an example, if the value should include a slash ("/") not intended as
-     * delimiter between path segments, that value MUST be passed in encoded
-     * form (e.g., "%2F") to the instance.
-     *
-     * @param string|iUriSequence $path
-     *
-     * @return $this
-     */
-    function xsetPath($path)
-    {
-        if (is_string($path))
-            $path = new UriSequence($path);
-
-        if (!$path instanceof iUriSequence)
-            throw new \InvalidArgumentException(sprintf(
-                'Path must be uri string or instance of iSeqPathUri, "%s" given instead.'
-                , is_object($path) ? get_class($path) : gettype($path)
-            ));
-
-        $pathStr = $path->toString();
-
-        if (strpos($pathStr, '?') !== false)
-            throw new \InvalidArgumentException(
-                'Invalid path provided; must not contain a query string'
-            );
-
-        if (strpos($pathStr, '#') !== false)
-            throw new \InvalidArgumentException(
-                'Invalid path provided; must not contain a URI fragment'
-            );
-
-
-        $this->path = $path->setSeparator($this->getSeparator());
-        return $this;
+            )
+            : null;
     }
 
     /**
@@ -359,8 +321,8 @@ class UriHttp
      */
     function setQuery($query)
     {
-        $query = $this->getQuery();
-        $query->with($query::parseWith($query));
+        $q = $this->getQuery();
+        $q->with($q::parseWith($query));
         return $this;
     }
 
@@ -389,14 +351,14 @@ class UriHttp
      */
     function setFragment($fragment)
     {
-        $this->fragment = $fragment;
+        $this->fragment = (string) $fragment;
         return $this;
     }
 
     /**
      * Get the URI fragment
      *
-     * @return string|false
+     * @return string|null
      */
     function getFragment()
     {
@@ -426,6 +388,17 @@ class UriHttp
         $scheme = strtolower($scheme);
         $scheme = preg_replace('#:(//)?$#', '', $scheme);
         return $scheme;
+    }
+
+    /**
+     * Filter Host
+     * @param string $host
+     * @return string
+     */
+    function _filterHost($host)
+    {
+        $host = strtolower($host);
+        return $host;
     }
 
 

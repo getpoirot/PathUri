@@ -1,7 +1,7 @@
 <?php
 namespace Poirot\PathUri\Interfaces;
 
-/**
+/*
  * Path:
  * 
  * - The path can either be 1)empty or 2)absolute (starting with a slash) or
@@ -15,9 +15,6 @@ namespace Poirot\PathUri\Interfaces;
  * delimiter between path segments, that value MUST be passed in encoded
  * form (e.g., "%2F") to the instance.
  *
- * @param string|iUriSequence $path
- *
- * @return $this
  */
 
 interface iUriHttp 
@@ -61,7 +58,7 @@ interface iUriHttp
      * The info syntax of the URI is:
      * [user-info@]host
      *
-     * @return string|null The URI user information, in "username[:password]" format
+     * @return string|null
      */
     function getUserInfo();
 
@@ -98,7 +95,7 @@ interface iUriHttp
     /**
      * Set the URI host port
      *
-     * @param int $port
+     * @param int|null $port
      *
      * @return $this
      */
