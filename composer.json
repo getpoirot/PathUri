@@ -10,6 +10,7 @@
     ],
     "require": {
         "poirot/std": "dev-devel"
+        , "psr/http-message": "1.0"
     },
     "target-dir": "Poirot/PathUri",
     "autoload"  : {
