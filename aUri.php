@@ -33,7 +33,7 @@ abstract class aUri
      * @override Ensure Throw Exception False
      * @inheritdoc
      */
-    function with(array $options, $throwException = false)
+    function with($options, $throwException = false)
     {
         parent::with($options, $throwException);
         return $this;
