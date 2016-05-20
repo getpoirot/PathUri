@@ -63,6 +63,7 @@ class UriHttp
         $stringPath = str_replace('\\', '/', $stringPath);
 
         # userInfo part:
+        // TODO it can be given from parse_url directly
         if (preg_match('/\/(?P<user_info>([\w]+[:]*[\w])+)@(\w+)/', $stringPath, $match)) {
             $parsed['user_info'] = $match['user_info'];
             // then remove
