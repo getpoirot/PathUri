@@ -8,6 +8,7 @@ abstract class aUri
     extends ConfigurableSetter
     implements iUriBase
 {
+    
     /**
      * SeqPathJoinUri constructor.
      * @param array $setter

@@ -2,6 +2,7 @@
 namespace Poirot\PathUri;
 
 use Poirot\PathUri\Interfaces\iUriSequence;
+use Traversable;
 
 /*
  
@@ -425,13 +426,13 @@ class UriSequence
      *
      * @return $this
      */
-    function setPath(array $path = null)
+    function setPath($path = null)
     {
         if ($path === null)
             $path = array();
 
         // the associate array is useless
-        $this->_pathSequence = array_values($path);
+        $this->_pathSequence = array_values( (array) $path);
         return $this;
     }
 

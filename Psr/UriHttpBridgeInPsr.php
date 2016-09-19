@@ -1,27 +1,28 @@
 <?php
 namespace Poirot\PathUri\Psr;
 
+use Psr\Http\Message\UriInterface;
+
 use Poirot\PathUri\UriHttp;
 use Poirot\PathUri\UriPathName;
 use Poirot\PathUri\UriSequence;
 
-class PsrUriHttp 
+
+class UriHttpBridgeInPsr
     implements UriInterface
 {
     /** @var UriHttp */
     protected $httpUri;
 
+
     /**
      * Construct
      *
-     * @param UriHttp|string|array $uri
+     * @param UriHttp $uri
      */
-    function __construct($uri)
+    function __construct(UriHttp $uri)
     {
-        if ($uri instanceof UriHttp)
-            $this->httpUri = $uri;
-        else
-            $this->httpUri = new UriHttp(UriHttp::parseWith($uri));
+        $this->httpUri = $uri;
     }
     
     /**

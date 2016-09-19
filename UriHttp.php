@@ -21,6 +21,16 @@ use Poirot\PathUri\Interfaces\iDataQueryParams;
  *
  */
 
+/**
+ * TODO What if we want to render a part of Uri;
+ *   seems not bad to separate path() method that fully return UriPathName and so on
+ * 
+ *   $reqUrl->setScheme(null)->setHost(null)->setUserInfo(null)->setPort(null);
+ *   $target = $reqUrl->toString();
+ *   
+ *   $reqUrl->path()->toString()
+ */
+
 class UriHttp
     extends UriPathName
     implements iUriHttp
@@ -107,6 +117,8 @@ class UriHttp
             'path'      => $this->getPath(),
             'query'     => $this->getQuery()->toString(),
             'fragment'  => $this->getFragment(),
+            
+            'authority' => $this->getAuthority(),
         );
 
         return $parse;
@@ -127,15 +139,7 @@ class UriHttp
         if ($this->getScheme())
             $uri .= $this->getScheme() . ':'. '//';
 
-        if ($this->getHost() !== null) {
-            if ($this->getUserInfo())
-                $uri .= $this->getUserInfo() . '@';
-
-            $uri .= $this->getHost();
-            if ($this->getPort())
-                $uri .= ':' . $this->getPort();
-        }
-
+        $uri .= $this->getAuthority();
         $uri .= parent::toString();
 
         if ($this->getHost() && (!$this->getQuery()->isEmpty() || $this->getFragment()))
@@ -310,6 +314,39 @@ class UriHttp
             : null;
     }
 
+    /**
+     * Retrieve the authority component of the URI.
+     *
+     * If no authority information is present, this method MUST return an empty
+     * string.
+     *
+     * The authority syntax of the URI is:
+     *
+     * <pre>
+     * [user-info@]host[:port]
+     * </pre>
+     *
+     * If the port component is not set or is the standard port for the current
+     * scheme, it SHOULD NOT be included.
+     *
+     * @see https://tools.ietf.org/html/rfc3986#section-3.2
+     * @return string The URI authority, in "[user-info@]host[:port]" format.
+     */
+    function getAuthority()
+    {
+        $uri = null;
+        if ($this->getHost() !== null) {
+            if ($this->getUserInfo())
+                $uri .= $this->getUserInfo() . '@';
+
+            $uri .= $this->getHost();
+            if ($this->getPort())
+                $uri .= ':' . $this->getPort();
+        }
+        
+        return $uri;
+    }
+    
     /**
      * Set the query
      *
