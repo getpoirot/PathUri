@@ -111,9 +111,8 @@ class UriSequence
     function append(iUriSequence $appendUri)
     {
         $appendPath = $appendUri->getPath();
-
-        if ($appendUri->isAbsolute())
-            $appendPath = $this->_makeNoneAbsolutePathSequence($appendPath);
+        /*if ($appendUri->isAbsolute())
+            $appendPath = $this->_makeNoneAbsolutePathSequence($appendPath);*/
 
         $finalPath = array_merge($this->getPath(), $appendPath);
         $this->setPath($finalPath);
@@ -132,11 +131,14 @@ class UriSequence
      */
     function prepend(iUriSequence $prependUri)
     {
+        $prependPath = $prependUri->getPath();
+        if (empty($prependPath))
+            return $this;
+
         $toPath = $this->getPath();
         if ($this->isAbsolute())
             $toPath = $this->_makeNoneAbsolutePathSequence($toPath);
 
-        $prependPath = $prependUri->getPath();
         $finalPath   = array_merge($prependPath, $toPath);
 
         $this->setPath($finalPath);

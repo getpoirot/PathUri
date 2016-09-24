@@ -61,13 +61,13 @@ class UriHttp
     protected function doParseFromString($stringPath)
     {
         $parsed = array(
-            'scheme'    => '',
-            'user_info' => '',
-            'host'      => '',
-            'port'      => '',
-            'path'      => '',
-            'query'     => '',
-            'fragment'  => '',
+            'scheme'    => null,
+            'user_info' => null,
+            'host'      => null,
+            'port'      => null,
+            'path'      => null,
+            'query'     => null,
+            'fragment'  => null,
         );
 
         $stringPath = str_replace('\\', '/', $stringPath);
@@ -162,14 +162,15 @@ class UriHttp
     /**
      * Set the URI scheme
      *
-     * @param string $scheme
+     * @param string|null $scheme
      *
      * @throws \InvalidArgumentException
      * @return $this
      */
     function setScheme($scheme)
     {
-        $scheme = $this->_filterScheme((string) $scheme);
+        if ($scheme !== null)
+            $scheme = $this->_filterScheme((string) $scheme);
 
         $this->scheme = $scheme;
         return $this;
@@ -199,7 +200,10 @@ class UriHttp
      */
     function setUserInfo($userInfo)
     {
-        $this->userInfo = (string) $userInfo;
+        if ($userInfo !== null)
+            $userInfo = (string) $userInfo;
+
+        $this->userInfo = $userInfo;
         return $this;
     }
 
@@ -238,7 +242,10 @@ class UriHttp
      */
     function setHost($host)
     {
-        $this->host = $this->_filterHost((string) $host);
+        if ($host !== null)
+            $host = $this->_filterHost((string) $host);
+
+        $this->host = $host;
         return $this;
     }
 
@@ -263,14 +270,15 @@ class UriHttp
      */
     function setPort($port)
     {
-        if (empty($port) && $port !== 0)
-            $port = null;
-        elseif ($port < 1 || $port > 65535)
-            throw new \InvalidArgumentException(sprintf(
-                'Invalid port "%d" specified; must be a valid TCP/UDP port',
-                $port
-            ));
-
+        if ($port !== null) {
+            if (empty($port) && $port !== 0)
+                $port = null;
+            elseif ($port < 1 || $port > 65535)
+                throw new \InvalidArgumentException(sprintf(
+                    'Invalid port "%d" specified; must be a valid TCP/UDP port',
+                    $port
+                ));
+        }
 
         $this->port = $port;
         return $this;
@@ -359,8 +367,11 @@ class UriHttp
      */
     function setQuery($query)
     {
-        $q = $this->getQuery();
-        $q->with($q::parseWith($query));
+        if ($query !== null) {
+            $q = $this->getQuery();
+            $q->with($q::parseWith($query));
+        }
+
         return $this;
     }
 
@@ -410,7 +421,7 @@ class UriHttp
      */
     function isAbsolute()
     {
-        return ($this->getScheme() !== null);
+        return (boolean) $this->getScheme();
     }
     
 
