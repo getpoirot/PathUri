@@ -94,7 +94,7 @@ class UriSequence
         $p = $this->getPath();
 
         reset($p);
-        $fi     = current($p);
+        $fi = current($p);
         return $this->_isRoot($fi);
     }
 
@@ -336,7 +336,8 @@ class UriSequence
             // its home, implode not working for one element
             return $DS;
 
-        if ($this->isAbsolute() && $path[0] == $this->getSeparator() /* unix style */) {
+        // TODO conflict with classes that extends this; we have to use self to call this class method not parent implementation for method
+        if (self::isAbsolute() && $path[0] == $this->getSeparator() /* unix style */) {
             // in specific case "//df" implode result in "///df"
             unset($path[0]);
             $return = $this->getSeparator().implode( $this->getSeparator(), $path );
