@@ -90,10 +90,11 @@ class UriHttp
         $parsed = array_merge($parsed, $purl);
 
         # filter parts
-        array_walk($parsed, function(&$item, $key) {
+        $self = $this;
+        array_walk($parsed, function(&$item, $key) use ($self) {
             $method = '_filter'.\Poirot\Std\cast((string)$key)->camelCase();
-            if (method_exists($this, $method))
-                $item = call_user_func(array($this, $method), $item);
+            if (method_exists($self, $method))
+                $item = call_user_func(array($self, $method), $item);
         });
 
         $parsed = array_merge($parsed, parent::doParseFromString($parsed['path']));
