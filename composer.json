@@ -9,7 +9,7 @@
         }
     ],
     "require": {
-        "poirot/std": "dev-devel"
+        "poirot/std": "dev-master"
         , "psr/http-message": "1.0"
     },
     "target-dir": "Poirot/PathUri",
@@ -21,7 +21,4 @@
             "_functions.php"
         ]
     }
-    ,"repositories": [
-       { "type": "git" ,"url": "https://github.com/phPoirot/Std.git" }
-    ]
 }
